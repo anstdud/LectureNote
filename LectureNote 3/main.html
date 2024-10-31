@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LectureNote</title>
+    <link rel="stylesheet" href="scss-main/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar" aria-label="Main">
+                <div class="navbar-logo">
+                    <img class="navbar-logo__img" src="img/logo.svg" alt="Логотип">
+                    <a href="#" class="navbar-logo__a">LectureNote</a>
+                </div>
+                <div class="navbar-button">
+                    <button class="navbar-profile" onclick="toggleMenu()">
+                        <img src="img/profile.svg" class="navbar-profile__img" alt="Фото профиля">
+                    </button>
+                    <div class="navbar-menu" id="dropdownMenu">
+                        <ul class="navbar-menu__list">
+                            <li class="nav-menu__item"><a href="#" class="nav-button-menu__link">Что-то</a></li>
+                            <li class="nav-menu__item"><a href="#" class="nav-button-menu__link">Что-то</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main class="main">
+        <div class="container">
+            <div class="lectures">
+                <div class="lectures-create">
+                    <button class="lectures-item lectures-item-create" data-modal="modal-create" onclick="openModal('modal-create')">
+                        <span class="circle-icon">+</span> Создать новую запись
+                    </button>
+                    <div class="lectures-modal" id="modal-create">
+                        <div class="lectures-modal-content">
+                            <button class="close-btn" data-modal="modal-create">
+                                <img src="img/chevron-down-solid.svg" alt="Стрелочка">
+                            </button>
+                            <div id="lectures-text-container">
+                                <p class="editableText">Это текст, который можно редактировать 1.</p>
+                                <textarea style="display:none;"></textarea>
+                            </div>
+                            <div class="lectures-button">
+                                <button class="lectures-exportbtn">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lectures-existing">
+                    <button class="lectures-item lectures-item-existing" data-modal="modal-existing" onclick="openModal('modal-existing')">
+                        <span class="circle-icon"><img src="img/book.svg" alt="Значек книжки"></span> Предмет 1
+                    </button>
+                    <div class="lectures-modal" id="modal-existing">
+                        <div class="lectures-modal-content">
+                            <button class="close-btn" data-modal="modal-existing">
+                                <img src="img/chevron-down-solid.svg" alt="Стрелочка">
+                            </button>
+                            <div id="lectures-text-container">
+                                <p class="editableText">Это текст, который можно редактировать 2.</p>
+                                <textarea style="display:none;"></textarea>
+                            </div>
+                            <div class="lectures-button">
+                                <button class="lectures-exportbtn">Отправить</button>
+                                <button class="lectures-editbtn">Изменить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lectures-existing">
+                    <button class="lectures-item lectures-item-existing" data-modal="modal-existing" onclick="openModal('modal-existing')">
+                        <span class="circle-icon"><img src="img/book.svg" alt="Значек книжки"></span> Предмет 2
+                    </button>
+                    <div class="lectures-modal" id="modal-existing">
+                        <div class="lectures-modal-content">
+                            <button class="close-btn" data-modal="modal-existing">
+                                <img src="img/chevron-down-solid.svg" alt="Стрелочка">
+                            </button>
+                            <div id="lectures-text-container">
+                                <p class="editableText">Это текст, который можно редактировать 3.</p>
+                                <textarea style="display:none;"></textarea>
+                            </div>
+                            <div class="lectures-button">
+                                <button class="lectures-exportbtn">Отправить</button>
+                                <button class="lectures-editbtn">Изменить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <script src="main.js"></script>
+</body>
+</html>

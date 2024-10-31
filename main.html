@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LectureNote</title>
+    <link rel="stylesheet" href="scss-main/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav class="navbar" aria-label="Main">
+                <div class="navbar-logo">
+                    <img class="navbar-logo__img" src="img/logo.svg" alt="Логотип">
+                    <a href="#" class="navbar-logo__a">LectureNote</a>
+                </div>
+                <div class="navbar-button">
+                    <button class="navbar-profile" onclick="toggleMenu()">
+                        <img src="img/profile.svg" class="navbar-profile__img" alt="Фото профиля">
+                    </button>
+                    <div class="navbar-menu" id="dropdownMenu">
+                        <ul class="navbar-menu__list">
+                            <li class="navbar-menu__item"><a href="#" class="navbar-menu__link">Что-то</a></li>
+                            <li class="navbar-menu__item"><a href="#" class="navbar-menu__link">Что-то</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main class="main">
+        <div class="container">
+            <div class="lectures">
+                <div class="lectures-create">
+                    <button class="lectures-btn lectures-btn-create" onclick="openModal()">
+                        <span class="circle-icon">+</span> Создать новую запись
+                    </button>
+                    <div class="lectures-modal" id="modal-create">
+                        <div class="lectures-modal-content">
+                            <button class="close-btn" onclick="closeModal()">
+                                <img src="img/chevron-down-solid.svg" alt="Стрелочка">
+                            </button>
+                            <div id="lectures-text-container">
+                                <input type="text" id="lecture-title" placeholder="Введите название лекции" style="display:none; width: 100%; margin-bottom: 10px;">
+                                <p id="lecture-title-display" style="font-weight: bold; font-size: 18px; margin-bottom: 10px;"></p> <!-- Отображение названия -->
+                                <textarea id="lecture-text" style="display:none;"></textarea>
+                                <p id="lecture-display" style="display:none;"></p> <!-- Отображаем текст -->
+                            </div>
+                            <div class="lectures-button">
+                                <button class="lectures-exportbtn" id="export-button" style="display: none;" onclick="exportToWord()">Отправить</button>
+                                <button class="lectures-savebtn" id="save-button" onclick="saveLecture()">Сохранить</button>
+                                <button class="lectures-editbtn" id="edit-button" style="display: none;" onclick="enableEdit()">Изменить</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="lecture-list"></div>        
+            </div>
+        </div>
+    </main>
+    <script src="main.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+</body>
+</html>
