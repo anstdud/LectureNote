@@ -41,11 +41,11 @@
                             <button class="close-btn" onclick="closeModal()">
                                 <img src="img/chevron-down-solid.svg" alt="Стрелочка">
                             </button>
-                            <div id="lectures-text-container">
-                                <input type="text" id="lecture-title" placeholder="Введите название лекции" style="display:none; width: 100%; margin-bottom: 10px;">
-                                <p id="lecture-title-display" style="font-weight: bold; font-size: 18px; margin-bottom: 10px;"></p> <!-- Отображение названия -->
-                                <textarea id="lecture-text" style="display:none;"></textarea>
-                                <p id="lecture-display" style="display:none;"></p> <!-- Отображаем текст -->
+                            <div class="lectures-text-container" id="lectures-text-container">
+                                <input class="lectures-title-input" type="text" id="lecture-title" placeholder="Название лекции">
+                                <p class="lectures-title-display" id="lecture-title-display" style="font-weight: bold; font-size: 18px; margin-bottom: 10px;"></p>
+                                <textarea class="lectures-text-textarea" id="lecture-text" style="display:none;" placeholder="Пиши лекцию"></textarea>
+                                <p class="lectures-text-display" id="lecture-display" style="display:none;"></p>
                             </div>
                             <div class="lectures-button">
                                 <button class="lectures-exportbtn" id="export-button" style="display: none;" onclick="exportToWord()">Отправить</button>

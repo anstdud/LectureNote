@@ -10,7 +10,6 @@ function toggleMenu() {
 
 // Закрытие меню при клике вне его области
 window.onclick = function(event) {
-    // Проверяем, является ли нажатый элемент кнопкой или частью меню
     if (!event.target.matches('.navbar-profile') && !event.target.closest('.navbar-menu')) {
         var dropdowns = document.getElementsByClassName("dropdownMenu");
         for (var i = 0; i < dropdowns.length; i++) {
@@ -21,30 +20,6 @@ window.onclick = function(event) {
         }
     }
 }
-
-// document.getElementById("openButton").addEventListener("click", function() {
-//     var modal = document.getElementById("modalWindow");
-//     modal.classList.add("show");
-// });
-
-// document.getElementById("closeButton").addEventListener("click", function() {
-//     var modal = document.getElementById("modalWindow");
-//     modal.classList.remove("show");
-// });
-
-// document.querySelectorAll('.lectures-item').forEach(function(button) {
-//     button.addEventListener('click', function() {
-//         var modalId = this.getAttribute('data-modal');
-//         document.getElementById(modalId).classList.add('show');
-//     });
-// });
-
-// document.querySelectorAll('.close-btn').forEach(function(button) {
-//     button.addEventListener('click', function() {
-//         var modalId = this.getAttribute('data-modal');
-//         document.getElementById(modalId).classList.remove('show');
-//     });
-// });
 
 // Функция открытия модального окна
 document.querySelectorAll('.lectures-item').forEach(function(button) {
