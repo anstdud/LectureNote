@@ -143,5 +143,5 @@ function resetButtons() {
 }
 
 function exportToWord() {
-    // Логика для экспорта в Word
+
 } 
