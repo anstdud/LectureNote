@@ -210,5 +210,36 @@ nav {
         .lectures-exportbtn:hover {
             background-color: rgba(56, 48, 59, 0.8);
         }
+        // /* Анимация для открытия модального окна */
+        // @keyframes slideUp {
+        //     from {
+        //         transform: translate(-50%, 100%);
+        //         opacity: 0;
+        //     }
+        //     to {
+        //         transform: translate(-50%, 0);
+        //         opacity: 1;
+        //     }
+        // }
+        // /* Анимация для закрытия модального окна */
+        // @keyframes slideDown {
+        //     from {
+        //         transform: translate(-50%, 0);
+        //         opacity: 1;
+        //     }
+        //     to {
+        //         transform: translate(-50%, 100%);
+        //         opacity: 0;
+        //     }
+        // }
+        // /* Применение анимации для модального окна */
+        // .lectures-modal.show {
+        //     display: block;
+        //     animation: slideUp 0.5s ease forwards;
+        // }
+        // /* Класс для скрытия окна с анимацией */
+        // .lectures-modal.hide {
+        //     animation: slideDown 0.5s ease forwards;
+        // }
     }
 }

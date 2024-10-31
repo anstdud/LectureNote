@@ -87,7 +87,7 @@ nav .navbar-button .navbar-menu .navbar-menu__list li a {
   text-decoration: none;
   font-size: 20px;
 }
-nav .navbar-button .navbar-menu .nav-button-menu__link:hover {
+nav .navbar-button .navbar-menu .nav-menu__link:hover {
   background-color: #FAF3EB;
 }
 
@@ -108,9 +108,11 @@ nav .navbar-button .navbar-menu .nav-button-menu__link:hover {
   display: none;
 }
 .lectures .lectures-modal-content {
+  display: flex;
+  flex-direction: column;
   padding: 15px;
   text-align: left;
-  max-height: calc(100% - 40px);
+  height: calc(100% - 70px);
 }
 .lectures .lectures-btn {
   width: 100%;
@@ -149,19 +151,42 @@ nav .navbar-button .navbar-menu .nav-button-menu__link:hover {
   margin-right: 10px;
   text-align: center;
 }
+.lectures .lectures-text-container {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.lectures .lectures-text-container .lectures-title-input {
+  display: none;
+  width: 100%;
+  height: 35px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  padding: 10px;
+  outline: none;
+  border: 1px solid #548B74;
+}
+.lectures .lectures-text-container .lectures-text-textarea {
+  width: 100%;
+  flex-grow: 1;
+  margin-top: 10px;
+  padding: 10px;
+  outline: none;
+  border: 1px solid #548B74;
+  resize: none;
+  overflow: auto;
+}
 .lectures .lectures-button {
   position: fixed;
   bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-}
-.lectures textarea {
+  left: 0;
   width: 100%;
-  height: 670px;
-  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  gap: 10px;
 }
-.lectures .lectures-savebtn, .lectures .lectures-editbtn, .lectures .lectures-exportbtn {
+.lectures .lectures-button .lectures-savebtn, .lectures .lectures-button .lectures-editbtn, .lectures .lectures-button .lectures-exportbtn {
   width: 130px;
   height: 40px;
   padding: 10px 20px;
@@ -170,15 +195,24 @@ nav .navbar-button .navbar-menu .nav-button-menu__link:hover {
   border-radius: 20px;
   cursor: pointer;
 }
-.lectures .lectures-savebtn, .lectures .lectures-editbtn {
+.lectures .lectures-button .lectures-exportbtn {
+  align-items: flex-start;
+}
+.lectures .lectures-button .lectures-editbtn {
+  align-items: flex-end;
+}
+.lectures .lectures-button .lectures-savebtn {
+  margin: 0 auto;
+}
+.lectures .lectures-button .lectures-savebtn, .lectures .lectures-button .lectures-editbtn {
   background-color: #548B74;
 }
-.lectures .lectures-exportbtn {
+.lectures .lectures-button .lectures-exportbtn {
   background-color: #38303B;
 }
-.lectures .lectures-editbtn:hover, .lectures .lectures-savebtn:hover {
+.lectures .lectures-button .lectures-editbtn:hover, .lectures .lectures-button .lectures-savebtn:hover {
   background-color: rgba(85, 139, 116, 0.8);
 }
-.lectures .lectures-exportbtn:hover {
+.lectures .lectures-button .lectures-exportbtn:hover {
   background-color: rgba(56, 48, 59, 0.8);
 }/*# sourceMappingURL=main.css.map */

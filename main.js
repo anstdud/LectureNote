@@ -48,8 +48,8 @@ window.onclick = function(event) {
     }
 };
 
-let currentLectureIndex = null; // Для отслеживания текущей лекции
-let lectures = []; // Массив для хранения лекций
+let currentLectureIndex = null; 
+let lectures = []; 
 function createLectureItem(title, text) {
     const lectureItem = document.createElement('div');
     lectureItem.className = 'lecture-item lectures-existing';
@@ -66,12 +66,12 @@ function saveLecture() {
     const text = document.getElementById('lecture-text').value;
     if (title && text) {
         if (currentLectureIndex === null) {
-            lectures.push({ title, text }); // Создаем новую лекцию
-            createLectureItem(title, text); // Создаем элемент списка
+            lectures.push({ title, text }); 
+            createLectureItem(title, text); 
         } else {
-            lectures[currentLectureIndex].title = title; // Обновляем название
-            lectures[currentLectureIndex].text = text; // Обновляем текст
-            updateLectureItem(currentLectureIndex); // Обновляем элемент списка
+            lectures[currentLectureIndex].title = title; 
+            lectures[currentLectureIndex].text = text; 
+            updateLectureItem(currentLectureIndex); 
         }
         closeModal();
         resetButtons(); 
@@ -86,32 +86,32 @@ function updateLectureItem(index) {
 }
 
 function openLecture(index) {
-    currentLectureIndex = index; // Сохраняем индекс текущей лекции
+    currentLectureIndex = index; 
     const title = lectures[index].title;
     const text = lectures[index].text;
-    document.getElementById('lecture-title').value = title; // Заполняем значение в поле ввода
-    document.getElementById('lecture-title-display').innerText = title; // Отображаем название
-    document.getElementById('lecture-display').innerText = text; // Отображаем текст лекции
-    openModal(); // Открываем модальное окно
-    document.getElementById('export-button').style.display = 'block'; // Показываем кнопку "Отправить"
-    document.getElementById('edit-button').style.display = 'block'; // Показываем кнопку "Изменить"
-    document.getElementById('save-button').style.display = 'none'; // Скрываем кнопку "Сохранить"
-    document.getElementById('lecture-display').style.display = 'block'; // Показываем текст
-    document.getElementById('lecture-text').style.display = 'none'; // Скрываем textarea
-    document.getElementById('lecture-title').style.display = 'none'; // Скрываем поле ввода названия
-    document.getElementById('lecture-title-display').style.display = 'block'; // Показываем отображаемое название
+    document.getElementById('lecture-title').value = title; 
+    document.getElementById('lecture-title-display').innerText = title; 
+    document.getElementById('lecture-display').innerText = text; 
+    openModal(); 
+    document.getElementById('export-button').style.display = 'block'; 
+    document.getElementById('edit-button').style.display = 'block'; 
+    document.getElementById('save-button').style.display = 'none'; 
+    document.getElementById('lecture-display').style.display = 'block';
+    document.getElementById('lecture-text').style.display = 'none'; 
+    document.getElementById('lecture-title').style.display = 'none'; 
+    document.getElementById('lecture-title-display').style.display = 'block'; 
 }
 
 function enableEdit() {
-    document.getElementById('lecture-title').style.display = 'block'; // Показываем поле для редактирования названия
-    document.getElementById('lecture-title-display').style.display = 'none'; // Скрываем отображаемое название
+    document.getElementById('lecture-title').style.display = 'block';
+    document.getElementById('lecture-title-display').style.display = 'none';
     const textArea = document.getElementById('lecture-text');
-    textArea.style.display = 'block'; // Показываем textarea
-    textArea.value = lectures[currentLectureIndex].text; // Вставляем текст лекции
-    document.getElementById('lecture-display').style.display = 'none'; // Скрываем текст для чтения
-    document.getElementById('save-button').style.display = 'block'; // Показываем кнопку "Сохранить"
-    document.getElementById('edit-button').style.display = 'none'; // Скрываем кнопку "Изменить"
-    document.getElementById('export-button').style.display = 'none'; // Скрываем кнопку "Отправить"
+    textArea.style.display = 'block'; 
+    textArea.value = lectures[currentLectureIndex].text; 
+    document.getElementById('lecture-display').style.display = 'none'; 
+    document.getElementById('save-button').style.display = 'block'; 
+    document.getElementById('edit-button').style.display = 'none';
+    document.getElementById('export-button').style.display = 'none'; 
 }
 
 function openModal() {
@@ -121,25 +121,25 @@ function openModal() {
 
 function closeModal() {
     document.getElementById('modal-create').style.display = 'none';
-    resetForm(); // Очищаем форму при закрытии
+    resetForm(); 
 }
 
 function resetForm() {
-    document.getElementById('lecture-title').value = ''; // Очищаем заголовок
-    document.getElementById('lecture-text').value = ''; // Очищаем текст лекции
-    document.getElementById('lecture-display').innerText = ''; // Очищаем отображаемый текст
-    document.getElementById('lecture-title-display').innerText = ''; // Очищаем отображаемое название
-    currentLectureIndex = null; // Сбрасываем индекс текущей лекции
+    document.getElementById('lecture-title').value = ''; 
+    document.getElementById('lecture-text').value = ''; 
+    document.getElementById('lecture-display').innerText = '';
+    document.getElementById('lecture-title-display').innerText = ''; 
+    currentLectureIndex = null; 
 }
 
 function resetButtons() {
-    document.getElementById('edit-button').style.display = 'none'; // Скрываем кнопку "Изменить"
-    document.getElementById('export-button').style.display = 'none'; // Скрываем кнопку "Отправить"
-    document.getElementById('save-button').style.display = 'block'; // Показываем кнопку "Сохранить"
-    document.getElementById('lecture-text').style.display = 'block'; // Показываем textarea для создания новой лекции
-    document.getElementById('lecture-display').style.display = 'none'; // Скрываем текст лекции
-    document.getElementById('lecture-title-display').style.display = 'none'; // Скрываем отображаемое название
-    document.getElementById('lecture-title').style.display = 'block'; // Показываем поле для создания названия
+    document.getElementById('edit-button').style.display = 'none';
+    document.getElementById('export-button').style.display = 'none'; 
+    document.getElementById('save-button').style.display = 'block'; 
+    document.getElementById('lecture-text').style.display = 'block'; 
+    document.getElementById('lecture-display').style.display = 'none'; 
+    document.getElementById('lecture-title-display').style.display = 'none'; 
+    document.getElementById('lecture-title').style.display = 'block'; 
 }
 
 function exportToWord() {
