@@ -1,0 +1,113 @@
+.lecture-modal {
+    position: fixed;
+    top: -20px;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+}
+
+.lecture-modal-content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 80%;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #FAF3EB;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.lectures-btn, .close-btn {
+    border: none;
+    border-bottom: 1px solid #201209;
+    cursor: pointer;
+}
+
+.close-btn {
+    width: 30px;
+    border: none;
+    background-color: unset;
+}
+
+.lectures-modal-text-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.lectures-modal-title {
+    font-size: 18px;
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: none;
+    border-bottom: 1px solid #201209;
+    outline: none;
+    background: none;
+}
+
+.lectures-modal-textarea {
+    width: 100%;
+    flex-grow: 1;
+    padding: 10px;
+    outline: none;
+    border: none;
+    background: none;
+    resize: none;
+    overflow-y: auto;
+    box-sizing: border-box;
+    font-size: 18px;
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+}
+
+.lectures-button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    bottom: 30px;
+    width: calc(100% - 40px);
+    box-sizing: border-box;
+}
+
+.lectures-savebtn, .lectures-editbtn, .lectures-exportbtn {
+    width: 130px;
+    height: 40px;
+    padding: 10px 20px;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
+    background-color: #548B74;
+}
+
+.lectures-exportbtn {
+    background-color: #201209;
+}
+
+.lectures-savebtn {
+    position: fixed;
+    left: 50%;
+    bottom: 30px;
+    transform: translateX(-50%);
+}
+
+.lectures-savebtn:hover, .lectures-editbtn:hover {
+    background-color: rgba(85, 139, 116, 0.8);
+}
+
+.lectures-exportbtn:hover {
+    background-color: rgba(56, 48, 59, 0.8);
+}

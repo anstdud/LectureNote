@@ -1,0 +1,54 @@
+.lecture-item {
+    width: 100%;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    background-color: unset;
+    border: none;
+    margin-top: 10px;
+    font-size: 18px;
+    font-family: "TaylorSans", sans-serif;
+    position: relative;
+    border-bottom: 1px solid #38303B;
+}
+
+.circle-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background-color: #F9DABD;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    font-size: 30px;
+    flex-shrink: 0;
+}
+
+.lecture-item-btn {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    line-height: 30px;
+    margin-right: auto;
+    position: relative;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.lecture-item-delete {
+    width: 120px;
+    height: 40px;
+    background: #548B74;
+    border: none;
+    border-radius: 20px;
+    font-size: 14px;
+    color: #FAF3EB;
+    cursor: pointer;
+    margin-left: auto;
+    margin-right: 0;
+}
