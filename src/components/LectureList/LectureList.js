@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Modal from '../Modal/Modal.js'; // Убедитесь, что путь правильный
+import Modal from '../Modal/Modal.js';
 import './LectureList.css';
 import Book from '../img/book.svg';
 
