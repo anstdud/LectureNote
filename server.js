@@ -2,16 +2,21 @@ import express from 'express';
 import pkg from 'pg';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-
+import cors from 'cors';
 
 const { Pool } = pkg;
 const app = express();
 const port = process.env.PORT || 5001;
 
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:3000',  // Убедитесь, что это порт вашего фронтенда
+    methods: ['GET', 'POST'],        // Разрешаем только нужные методы
+}));
 
+// Настройки подключения к базе данных
 const pool = new Pool({
-    user: 'admin',
+    user: 'ttwinkleee',
     host: 'localhost',
     database: 'LectureNote',
     password: '1111',
@@ -23,22 +28,24 @@ pool.connect()
     .then(() => console.log('Бд подключена'))
     .catch(err => console.error('Бд НЕ подключена:', err));
 
-const JWT_SECRET = 'your_jwt_secret_key';
+const JWT_SECRET = 'your_jwt_secret_key';  // Используем эту переменную для подписи JWT
 
-// Пример маршрута для регистрации
+// Маршрут для регистрации
 app.post('/api/register', async (req, res) => {
     const { username, password, email } = req.body;
 
     try {
-        // Хэширование пароля
-        const hashedPassword = await bcrypt.hash(password, 10);
+        // Проверяем, существует ли уже пользователь с таким логином
+        const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        if (existingUser.rows.length > 0) {
+            return res.status(400).json({ error: 'Пользователь с таким логином уже существует' });
+        }
 
-        // Добавление пользователя
+        const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
             'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3) RETURNING *',
             [username, hashedPassword, email]
         );
-
         res.status(201).json(result.rows[0]);
     } catch (err) {
         console.error('Ошибка при регистрации:', err);
@@ -46,137 +53,118 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-
 // Маршрут для входа
 app.post('/api/login', async (req, res) => {
+    console.log('Запрос на вход:', req.body);
     const { username, password } = req.body;
 
     try {
-        // Находим пользователя по имени
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+
+        if (result.rows.length === 0) {
+            console.log('Пользователь не найден');
+            return res.status(401).json({ error: 'Неверный логин или пароль' });
+        }
+
         const user = result.rows[0];
+        console.log('Найден пользователь:', user);
 
-        // Если пользователь не найден
-        if (!user) {
-            return res.status(401).json({ error: 'Неверное имя пользователя или пароль' });
+        const isMatch = await bcrypt.compare(password, user.password_hash);
+        if (!isMatch) {
+            console.log('Пароли не совпадают');
+            return res.status(401).json({ error: 'Неверный логин или пароль' });
         }
 
-        // Проверяем пароль
-        const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-
-        // Если пароль неверный
-        if (!isPasswordValid) {
-            return res.status(401).json({ error: 'Неверное имя пользователя или пароль' });
-        }
-
-        // Генерация JWT
-        const token = jwt.sign(
-            { userId: user.id, username: user.username },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
-
-        res.status(200).json({ token });
+        const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+        console.log('Создан токен:', token);
+        res.json({ token });
     } catch (err) {
-        console.error('Error logging in:', err);
-        res.status(500).json({ error: 'Ошибка входа' });
+        console.error('Ошибка при входе:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
     }
-
-    console.log('Полученные данные:', { password, passwordHash: user.password_hash });
-    const isPasswordValid = await bcrypt.compare(password, user.password_hash);
-    console.log('Результат проверки пароля:', isPasswordValid);
-
 });
 
-// Middleware для проверки JWT
-const authenticate = (req, res, next) => {
-    const token = req.headers['authorization'];
+// Middleware для проверки токена
+function authenticate(req, res, next) {
+    const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-        return res.status(403).json({ error: 'Необходимо войти в систему' });
+        return res.status(401).json({ error: 'Отсутствует токен' });
     }
 
-    const tokenWithoutBearer = token.split(' ')[1];
-
-    // Проверяем токен
-    jwt.verify(tokenWithoutBearer, JWT_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(403).json({ error: 'Неверный или просроченный токен' });
-        }
-        req.user = decoded;
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET); // Исправлено на JWT_SECRET
+        req.user = decoded;  // Токен содержит id и username пользователя
         next();
-    });
-};
+    } catch (err) {
+        console.error('Ошибка токена:', err);
+        res.status(401).json({ error: 'Недействительный токен' });
+    }
+}
 
-// Защищённый маршрут
-app.get('/api/protected-route', authenticate, (req, res) => {
-    res.status(200).json({ message: 'Это защищённый маршрут', user: req.user });
-});
-
-
-// Маршрут для создания новой заметки
-app.post('/api/notes', authenticate, async (req, res) => {
-    const { title, content } = req.body;
-    const userId = req.user.userId; // Получаем ID пользователя из токена
+// Маршрут для получения лекций
+app.get('/api/lectures', authenticate, async (req, res) => {
+    const userId = req.user.id;
+    console.log('Проверка user_id:', req.user);
 
     try {
         const result = await pool.query(
-            `INSERT INTO notes (user_id, title, content) 
-             VALUES ($1, $2, $3) RETURNING *`,
-            [userId, title, content]
+            'SELECT * FROM notes WHERE user_id = $1 ORDER BY created_at DESC',
+            [userId]
+        );
+        res.json(result.rows);  // Отправляем лекции на фронтенд
+    } catch (err) {
+        console.error('Ошибка при получении лекций:', err);
+        res.status(500).json({ error: 'Ошибка при получении лекций' });
+    }
+});
+
+// Маршрут для сохранения лекции
+app.post('/api/lectures', authenticate, async (req, res) => {
+    const { title, text } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const result = await pool.query(
+            'INSERT INTO notes (user_id, title, text) VALUES ($1, $2, $3) RETURNING *',
+            [userId, title, text]
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
-        console.error('Ошибка при создании заметки:', err);
-        res.status(500).json({ error: 'Ошибка при создании заметки' });
+        console.error('Ошибка при сохранении лекции:', err);
+        res.status(500).json({ error: 'Ошибка при сохранении лекции' });
     }
 });
 
-// Маршрут для получения всех заметок пользователя
-app.get('/api/notes', authenticate, async (req, res) => {
-    const userId = req.user.userId;
-
-    try {
-        const result = await pool.query(
-            `SELECT * FROM notes WHERE user_id = $1 ORDER BY created_at DESC`,
-            [userId]
-        );
-        res.status(200).json(result.rows);
-    } catch (err) {
-        console.error('Ошибка при получении заметок:', err);
-        res.status(500).json({ error: 'Ошибка при получении заметок' });
-    }
-});
-
-// Маршрут для редактирования заметки
-app.put('/api/notes/:id', authenticate, async (req, res) => {
+// Маршрут для редактирования лекции
+app.put('/api/lectures/:id', authenticate, async (req, res) => {
     const { id } = req.params;
-    const { title, content } = req.body;
-    const userId = req.user.userId;
+    const { title, text } = req.body;
+    const userId = req.user.id;  // Исправлено на правильное извлечение userId
 
     try {
         const result = await pool.query(
             `UPDATE notes 
-             SET title = $1, content = $2, updated_at = CURRENT_TIMESTAMP
+             SET title = $1, text = $2, updated_at = CURRENT_TIMESTAMP
              WHERE id = $3 AND user_id = $4 RETURNING *`,
-            [title, content, id, userId]
+            [title, text, id, userId]
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Заметка не найдена или вы не являетесь ее владельцем' });
+            return res.status(404).json({ error: 'Лекция не найдена или вы не являетесь ее владельцем' });
         }
 
         res.status(200).json(result.rows[0]);
     } catch (err) {
-        console.error('Ошибка при обновлении заметки:', err);
-        res.status(500).json({ error: 'Ошибка при обновлении заметки' });
+        console.error('Ошибка при обновлении лекции:', err);
+        res.status(500).json({ error: 'Ошибка при обновлении лекции' });
     }
 });
 
-// Маршрут для удаления заметки
-app.delete('/api/notes/:id', authenticate, async (req, res) => {
+// Маршрут для удаления лекции
+app.delete('/api/lectures/:id', authenticate, async (req, res) => {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user.id;
 
     try {
         const result = await pool.query(
@@ -185,18 +173,16 @@ app.delete('/api/notes/:id', authenticate, async (req, res) => {
         );
 
         if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Заметка не найдена или вы не являетесь ее владельцем' });
+            return res.status(404).json({ error: 'Лекция не найдена или вы не являетесь ее владельцем' });
         }
 
-        res.status(200).json({ message: 'Заметка успешно удалена' });
+        res.status(200).json({ message: 'Лекция успешно удалена' });
     } catch (err) {
-        console.error('Ошибка при удалении заметки:', err);
-        res.status(500).json({ error: 'Ошибка при удалении заметки' });
+        console.error('Ошибка при удалении лекции:', err);
+        res.status(500).json({ error: 'Ошибка при удалении лекции' });
     }
 });
 
-
-// Запуск сервера
 app.listen(port, () => {
     console.log(`Сервер работает на порту ${port}`);
 });

@@ -4,28 +4,30 @@ import './LectureList.css';
 import Book from '../img/book.svg';
 
 const LectureList = () => {
-    const [lectures, setLectures] = useState([]);
+    const [lectures, setLectures] = useState([]); // Состояние для заметок
     const [modalOpen, setModalOpen] = useState(false);
     const [activeLecture, setActiveLecture] = useState(null);
 
-    const openModal = (lecture) => {
-        setActiveLecture(lecture);  // Устанавливаем активную лекцию
+    // Открытие модального окна для новой записи или редактирования существующей
+    const openModal = (lecture = null) => {
+        setActiveLecture(lecture);
         setModalOpen(true);
     };
+
     const closeModal = () => {
         setModalOpen(false);
-        setActiveLecture(null);  // Очищаем активную лекцию
+        setActiveLecture(null);
     };
 
     const saveLecture = (updatedLecture) => {
         if (updatedLecture) {
             if (activeLecture) {
-                // Если лекция уже существует (редактирование)
+                // Обновляем лекцию по названию
                 setLectures(lectures.map((lecture) =>
                     lecture.title === activeLecture.title ? updatedLecture : lecture
                 ));
             } else {
-                // Если лекция новая (создание)
+                // Добавляем новую лекцию
                 setLectures([...lectures, updatedLecture]);
             }
             closeModal();
@@ -33,20 +35,29 @@ const LectureList = () => {
     };
 
     const deleteLecture = (title) => {
+        // Удаляем лекцию по названию
         setLectures(lectures.filter(lecture => lecture.title !== title));
     };
 
     return (
         <div className="lectures-list">
-            <button className="lecture-item lectures-btn-create" onClick={() => openModal(null)}>
+            {/* Кнопка для создания новой записи */}
+            <button
+                className="lecture-item lectures-btn-create"
+                onClick={() => openModal(null)}
+            >
                 <span className="circle-icon">+</span> Создать новую запись
             </button>
 
+            {/* Отображение всех лекций */}
             {lectures.map((lecture, index) => (
                 <div key={index} className="lecture-item">
-                    <button onClick={() => openModal(lecture)} className="lecture-item-btn lecture-item">
+                    <button
+                        onClick={() => openModal(lecture)}
+                        className="lecture-item-btn lecture-item"
+                    >
                         <span className="circle-icon">
-                            <img src={Book} alt="Значок книжки"/>
+                            <img src={Book} alt="Значок книжки" />
                         </span>
                         {lecture.title}
                     </button>
@@ -59,6 +70,7 @@ const LectureList = () => {
                 </div>
             ))}
 
+            {/* Модальное окно для создания или редактирования лекции */}
             <Modal
                 isOpen={modalOpen}
                 onClose={closeModal}

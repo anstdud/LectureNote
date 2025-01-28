@@ -1,6 +1,6 @@
 .lecture-modal {
     position: fixed;
-    top: -20px;
+    top: 30px;
     left: 0;
     width: 100%;
     height: 100%;
@@ -15,7 +15,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 80%;
+    height: calc(100% - 90px);
     padding: 20px;
     border-radius: 8px;
     background-color: #FAF3EB;
@@ -40,6 +40,7 @@
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
+    margin-bottom: 20px;
 }
 
 .lectures-modal-title {
@@ -57,6 +58,7 @@
 
 .lectures-modal-textarea {
     width: 100%;
+    max-height: calc(100% - 90px);
     flex-grow: 1;
     padding: 10px;
     outline: none;
@@ -68,6 +70,7 @@
     font-size: 18px;
     font-family: "TaylorSans", sans-serif;
     color: #201209;
+    margin-bottom: 0;
 }
 
 .lectures-button-container {

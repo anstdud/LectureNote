@@ -1,20 +1,25 @@
-// src/components/Header.js
 import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
 import Logo from '../img/logo.svg';
 import Profile from '../img/profile.svg';
 
-// function Header() {
-//     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-//
-//     const toggleDropdown = () => {
-//         setIsDropdownOpen((prev) => !prev);
-//     };
-
-const Header = () => {
+const Header = ({ setIsAuthenticated }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [username, setUsername] = useState(null);
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
+
+    // Получаем имя пользователя из localStorage при загрузке компонента
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        console.log('Имя пользователя из localStorage:', storedUsername); // Лог для проверки
+        if (storedUsername) {
+            setUsername(storedUsername); // Устанавливаем имя пользователя
+        } else {
+            setUsername(null); // Если ничего нет, устанавливаем null
+        }
+    }, []);
+
 
     const handleToggleMenu = () => {
         setIsDropdownOpen((prev) => !prev);
@@ -27,34 +32,39 @@ const Header = () => {
             buttonRef.current &&
             !buttonRef.current.contains(event.target)
         ) {
-            console.log("Клик за пределами меню и кнопки");
             setIsDropdownOpen(false);
         }
     };
 
-    useEffect(() => {
-        document.addEventListener("click", handleClickOutside);
-        return () => {
-            document.removeEventListener("click", handleClickOutside);
-        };
-    }, []);
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('username');
+        setIsAuthenticated(false);
+    };
+
+    // Закрываем меню, если клик вне его
+    // useEffect(() => {
+    //     document.addEventListener('mousedown', handleClickOutside);
+    //     return () => {
+    //         document.removeEventListener('mousedown', handleClickOutside);
+    //     };
+    // }, []);
 
     return (
         <header className="header">
             <nav className="navbar" aria-label="Main">
                 <div className="navbar-logo">
-                    <img className="navbar-logo__img" src={Logo} alt="Логотип"/>
+                    <img className="navbar-logo__img" src={Logo} alt="Логотип" />
                     <a href="#" className="navbar-logo__a">LectureNote</a>
                 </div>
                 <div className="navbar-button">
                     <button className="navbar-profile" ref={buttonRef} onClick={handleToggleMenu}>
-                        <img src={Profile} className="navbar-profile__img" alt="Фото профиля"/>
+                        <img src={Profile} className="navbar-profile__img" alt="Фото профиля" />
                     </button>
                     {isDropdownOpen && (
                         <ul ref={dropdownRef} className="dropdown-menu">
-                            <li><a href="#">Мой профиль</a></li>
-                            <li><a href="#">Настройки</a></li>
-                            <li><a href="#">Выйти</a></li>
+                            <li><a href="#">{username || "Пользователь"}</a></li>
+                            <li><a href="#" onClick={handleLogout}>Выйти</a></li>
                         </ul>
                     )}
                 </div>
