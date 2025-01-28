@@ -1,11 +1,9 @@
-// src/components/ExportToWord.js
 import React from 'react';
 import { Document, Packer, Paragraph, TextRun } from 'docx';
-import { saveAs } from 'file-saver'; // Для сохранения файла
+import { saveAs } from 'file-saver';
 
 const ExportToWord = () => {
     const handleExport = () => {
-        // Создаем документ
         const doc = new Document({
             sections: [
                 {
@@ -26,7 +24,6 @@ const ExportToWord = () => {
             ],
         });
 
-        // Генерация файла и его скачивание
         Packer.toBlob(doc).then((blob) => {
             saveAs(blob, "example.docx");
         });

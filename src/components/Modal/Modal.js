@@ -65,7 +65,7 @@ const Modal = ({ isOpen, onClose, onSave, lecture }) => {
                             ],
                         }),
                         new Paragraph({
-                            alignment: AlignmentType.JUSTIFY, // Выравнивание по ширине
+                            alignment: AlignmentType.JUSTIFY,
                             children: [
                                 new TextRun({
                                     text: text,
@@ -74,7 +74,7 @@ const Modal = ({ isOpen, onClose, onSave, lecture }) => {
                                 }),
                             ],
                             spacing: { after: 120 },
-                            indentation: { firstLine: 240 }, // Отступ только для первой строки
+                            indentation: { firstLine: 240 },
                         }),
                     ],
                 },

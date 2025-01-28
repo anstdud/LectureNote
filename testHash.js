@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 
-// Тестируем хеширование
 const testPassword = async () => {
     const password = 'mysecretpassword';
     const hashedPassword = await bcrypt.hash(password, 10);

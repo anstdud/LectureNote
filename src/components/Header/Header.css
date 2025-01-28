@@ -1,13 +1,25 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+body {
+    overflow-x: hidden;
+}
+
 .navbar {
     width: 100%;
     height: 60px;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
 }
 
 .navbar-logo {
     font-size: 32px;
     font-family: "Revard", sans-serif;
+    display: flex;
+    align-items: center;
 }
 
 .navbar-logo__img {
@@ -18,58 +30,38 @@
 .navbar-logo__a {
     color: #201209;
     text-decoration: none;
+    margin-top: auto;
+    margin-bottom: -5px;
 }
 
 .navbar-button {
-    margin: auto 0 0 auto;
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 0;
 }
 
-.navbar-profile {
+.navbar-menu-toggle {
     width: 40px;
     height: 40px;
-    background: unset;
-    border-radius: 50%;
+    background: none;
     border: none;
+    font-size: 36px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     cursor: pointer;
+    border-radius: 50%;
 }
 
-.navbar-profile__img {
-    width: 25px;
-}
-
-.navbar-profile:hover {
-    background-color: #F9DABD;
-}
-
-.navbar-menu {
-    display: none;
-    position: absolute;
-    background-color: #F9DABD;
-    min-width: 160px;
-    height: auto;
-    border-radius: 10px;
-    z-index: 1;
-    transition: 0.5s ease;
-    right: 20px;
-}
-
-.navbar-menu__list {
-    list-style-type: none;
-    padding: 10px;
-}
-
-.navbar-menu__list li {
-    margin: 10px 0;
-}
-
-.navbar-menu__list li a {
+.navbar-menu-toggle__icon {
+    font-size: 46px;
     color: #201209;
-    text-decoration: none;
-    font-size: 20px;
+    line-height: 1;
 }
 
-.navbar-menu__list li a:hover {
-    background-color: #FAF3EB;
+.navbar-menu-toggle:hover {
+    background-color: transparent;
 }
 
 .dropdown-menu {
@@ -86,7 +78,7 @@
 }
 
 .dropdown-menu li {
-    padding: 10px;
+    padding: 5px 10px;
     border-bottom: 1px solid #ddd;
 }
 
@@ -97,9 +89,31 @@
 .dropdown-menu li a {
     color: #201209;
     text-decoration: none;
+    font-size: 16px;
     display: block;
 }
 
 .dropdown-menu li a:hover {
-    background-color: #f0f0f0;
+    background-color: #FAF3EB;
+}
+
+.dropdown-menu li button {
+    color: #201209;
+    background: unset;
+    border: none;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    padding: 5px 10px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+}
+
+.dropdown-menu li button:hover {
+    background-color: #FAF3EB;
+}
+
+.dropdown-menu li button:focus {
+    outline: none;
 }

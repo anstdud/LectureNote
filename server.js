@@ -4,38 +4,41 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 
+dotenv.config();
+
 const { Pool } = pkg;
 const app = express();
 const port = process.env.PORT || 5001;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',  // Убедитесь, что это порт вашего фронтенда
-    methods: ['GET', 'POST'],        // Разрешаем только нужные методы
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
 }));
 
-// Настройки подключения к базе данных
 const pool = new Pool({
-    user: 'ttwinkleee',
-    host: 'localhost',
-    database: 'LectureNote',
-    password: '1111',
-    port: 5432,
+    // user: 'ttwinkleee',
+    // host: 'localhost',
+    // database: 'LectureNote',
+    // password: '1111',
+    // port: 5432,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
 });
 
-// Проверка подключения к базе данных
 pool.connect()
     .then(() => console.log('Бд подключена'))
     .catch(err => console.error('Бд НЕ подключена:', err));
 
-const JWT_SECRET = 'your_jwt_secret_key';  // Используем эту переменную для подписи JWT
+const JWT_SECRET = 'your_jwt_secret_key';
 
-// Маршрут для регистрации
 app.post('/api/register', async (req, res) => {
     const { username, password, email } = req.body;
 
     try {
-        // Проверяем, существует ли уже пользователь с таким логином
         const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
         if (existingUser.rows.length > 0) {
             return res.status(400).json({ error: 'Пользователь с таким логином уже существует' });
@@ -95,7 +98,7 @@ function authenticate(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
-        console.log("Аутентифицированный пользователь:", decoded); // Лог для проверки
+        console.log("Аутентифицированный пользователь:", decoded);
         next();
     } catch (err) {
         console.error('Ошибка токена:', err);
@@ -114,7 +117,7 @@ app.get('/api/lectures', authenticate, async (req, res) => {
             'SELECT * FROM notes WHERE user_id = $1 ORDER BY created_at DESC',
             [userId]
         );
-        res.json(result.rows);  // Отправляем лекции на фронтенд
+        res.json(result.rows);
     } catch (err) {
         console.error('Ошибка при получении лекций:', err);
         res.status(500).json({ error: 'Ошибка при получении лекций' });
@@ -142,7 +145,7 @@ app.post('/api/lectures', authenticate, async (req, res) => {
 app.put('/api/lectures/:id', authenticate, async (req, res) => {
     const { id } = req.params;
     const { title, text } = req.body;
-    const userId = req.user.id;  // Исправлено на правильное извлечение userId
+    const userId = req.user.id;
 
     try {
         const result = await pool.query(

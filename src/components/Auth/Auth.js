@@ -10,10 +10,8 @@ const Auth = ({ onLogin, onRegister }) => {
         e.preventDefault();
 
         if (isLogin) {
-            // Если пользователь хочет войти
             onLogin(username, password);
         } else {
-            // Если пользователь хочет зарегистрироваться
             onRegister(username, password, email);
         }
     };

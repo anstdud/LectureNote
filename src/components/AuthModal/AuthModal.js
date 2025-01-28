@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import './AuthModal.css';
-/////
+
 const AuthModal = ({ setIsAuthenticated }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
-    const [isRegister, setIsRegister] = useState(false); // Для переключения между формами
+    const [isRegister, setIsRegister] = useState(false);
 
     const handleLogin = (username, password) => {
-        fetch('http://localhost:5001/api/login', {  // Убедитесь, что путь правильный
+        fetch('http://localhost:5001/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password })
@@ -22,7 +22,7 @@ const AuthModal = ({ setIsAuthenticated }) => {
             .then((data) => {
                 if (data.token) {
                     localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', username); // Сохраняем имя пользователя
+                    localStorage.setItem('username', username);
                     setIsAuthenticated(true);
                 } else {
                     alert('Неверный логин или пароль');
@@ -51,7 +51,7 @@ const AuthModal = ({ setIsAuthenticated }) => {
                 return response.json();
             })
             .then((data) => {
-                if (data.id) { // Если регистрация успешна
+                if (data.id) {
                     alert('Регистрация успешна');
                 } else {
                     alert('Ошибка регистрации');

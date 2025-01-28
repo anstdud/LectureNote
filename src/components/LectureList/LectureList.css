@@ -21,8 +21,8 @@
     justify-content: center;
     align-items: center;
     margin-right: 10px;
-    font-size: 30px;
-    flex-shrink: 0;
+    font-size: 26px;
+    line-height: 1;
 }
 
 .lecture-item-btn {
