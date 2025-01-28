@@ -21,8 +21,9 @@ const AuthModal = ({ setIsAuthenticated }) => {
             })
             .then((data) => {
                 if (data.token) {
-                    localStorage.setItem('token', data.token); // Сохраняем токен
-                    setIsAuthenticated(true); // Статус аутентификации
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('username', username); // Сохраняем имя пользователя
+                    setIsAuthenticated(true);
                 } else {
                     alert('Неверный логин или пароль');
                 }

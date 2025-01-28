@@ -93,13 +93,15 @@ function authenticate(req, res, next) {
     }
 
     try {
-        const decoded = jwt.verify(token, JWT_SECRET); // Исправлено на JWT_SECRET
-        req.user = decoded;  // Токен содержит id и username пользователя
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded;
+        console.log("Аутентифицированный пользователь:", decoded); // Лог для проверки
         next();
     } catch (err) {
         console.error('Ошибка токена:', err);
         res.status(401).json({ error: 'Недействительный токен' });
     }
+
 }
 
 // Маршрут для получения лекций

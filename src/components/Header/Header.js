@@ -12,13 +12,8 @@ const Header = ({ setIsAuthenticated }) => {
     // Получаем имя пользователя из localStorage при загрузке компонента
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
-        console.log('Имя пользователя из localStorage:', storedUsername); // Лог для проверки
-        if (storedUsername) {
-            setUsername(storedUsername); // Устанавливаем имя пользователя
-        } else {
-            setUsername(null); // Если ничего нет, устанавливаем null
-        }
-    }, []);
+        setUsername(storedUsername || null);
+    }, [setIsAuthenticated]); // Теперь username обновится при изменении isAuthenticated
 
 
     const handleToggleMenu = () => {
