@@ -66,6 +66,7 @@ const AuthModal = ({ setIsAuthenticated }) => {
     return (
         <div className="auth-modal">
             <div>
+                <h2>{isRegister ? 'Регистрация' : 'Вход'}</h2>
                 <input
                     type="text"
                     placeholder="Имя пользователя"

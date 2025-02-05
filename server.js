@@ -3,6 +3,7 @@ import pkg from 'pg';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
+import * as dotenv from "dotenv";
 
 dotenv.config();
 
