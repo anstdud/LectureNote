@@ -65,8 +65,8 @@ const Header = ({ setIsAuthenticated }) => {
                     </button>
                     {isDropdownOpen && (
                         <ul ref={dropdownRef} className="dropdown-menu">
-                            <li><button onClick={(e) => e.preventDefault()}>{username || "Пользователь"}</button></li> {/* Используйте button вместо a */}
-                            <li><button onClick={handleLogout}>Выйти</button></li> {/* Используйте button вместо a */}
+                            <li><button onClick={(e) => e.preventDefault()}>{username || "Пользователь"}</button></li>
+                            <li><button onClick={handleLogout}>Выйти</button></li>
                         </ul>
                     )}
                 </div>
