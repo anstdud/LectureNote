@@ -52,6 +52,7 @@ const App = () => {
     }
   };
 
+
   const saveLecture = async (updatedLecture) => {
     const token = localStorage.getItem('token');
     if (!token) {

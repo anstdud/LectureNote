@@ -13,16 +13,12 @@ const port = process.env.PORT || 5001;
 
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:5002',
-    methods: ['GET', 'POST'],
+    origin: 'http://localhost:3000',
+    credentials: true,
 }));
 
+
 const pool = new Pool({
-    // user: 'ttwinkleee',
-    // host: 'localhost',
-    // database: 'LectureNote',
-    // password: '1111',
-    // port: 5432,
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
@@ -57,7 +53,6 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-// Маршрут для входа
 app.post('/api/login', async (req, res) => {
     console.log('Запрос на вход:', req.body);
     const { username, password } = req.body;
@@ -88,7 +83,6 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// Middleware для проверки токена
 function authenticate(req, res, next) {
     const token = req.headers.authorization?.split(' ')[1];
 
@@ -108,7 +102,6 @@ function authenticate(req, res, next) {
 
 }
 
-// Маршрут для получения лекций
 app.get('/api/lectures', authenticate, async (req, res) => {
     const userId = req.user.id;
     console.log('Проверка user_id:', req.user);
@@ -125,7 +118,6 @@ app.get('/api/lectures', authenticate, async (req, res) => {
     }
 });
 
-// Маршрут для сохранения лекции
 app.post('/api/lectures', authenticate, async (req, res) => {
     const { title, text } = req.body;
     const userId = req.user.id;
@@ -142,7 +134,6 @@ app.post('/api/lectures', authenticate, async (req, res) => {
     }
 });
 
-// Маршрут для редактирования лекции
 app.put('/api/lectures/:id', authenticate, async (req, res) => {
     const { id } = req.params;
     const { title, text } = req.body;
@@ -167,7 +158,6 @@ app.put('/api/lectures/:id', authenticate, async (req, res) => {
     }
 });
 
-// Маршрут для удаления лекции
 app.delete('/api/lectures/:id', authenticate, async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
