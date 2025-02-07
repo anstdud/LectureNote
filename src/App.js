@@ -7,7 +7,7 @@ import AuthModal from './components/AuthModal/AuthModal.js';
 const App = () => {
   const [lectures, setLectures] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentLectureIndex, setCurrentLectureIndex] = useState(null);
+  const [currentLecture, setCurrentLecture] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
@@ -16,14 +16,14 @@ const App = () => {
     }
   }, [isAuthenticated]);
 
-  const openModal = (index = null) => {
-    setCurrentLectureIndex(index);
+  const openModal = (lecture = null) => {
+    setCurrentLecture(lecture);
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
-    setCurrentLectureIndex(null);
+    setCurrentLecture(null);
   };
 
   const fetchLectures = async () => {
@@ -40,9 +40,7 @@ const App = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error('Ошибка при загрузке лекций');
-      }
+      if (!response.ok) throw new Error('Ошибка при загрузке лекций');
 
       const data = await response.json();
       setLectures(data);
@@ -52,8 +50,7 @@ const App = () => {
     }
   };
 
-
-  const saveLecture = async (updatedLecture) => {
+  const saveLecture = async (lectureData) => {
     const token = localStorage.getItem('token');
     if (!token) {
       alert('Необходимо войти в систему');
@@ -61,21 +58,24 @@ const App = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5001/api/lectures', {
-        method: 'POST',
+      const url = currentLecture
+          ? `http://localhost:5001/api/lectures/${currentLecture.id}`
+          : 'http://localhost:5001/api/lectures';
+
+      const method = currentLecture ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify(updatedLecture),
+        body: JSON.stringify(lectureData),
       });
 
-      if (!response.ok) {
-        throw new Error('Ошибка при сохранении лекции');
-      }
+      if (!response.ok) throw new Error('Ошибка при сохранении лекции');
 
-      const newLecture = await response.json();
-      setLectures([...lectures, newLecture]);
+      fetchLectures();
       closeModal();
     } catch (error) {
       console.error('Ошибка сохранения:', error);
@@ -83,15 +83,43 @@ const App = () => {
     }
   };
 
+  const deleteLecture = async (id) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Необходимо войти в систему');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/lectures/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (!response.ok) throw new Error('Ошибка при удалении лекции');
+
+      fetchLectures();
+    } catch (error) {
+      console.error('Ошибка удаления:', error);
+      alert('Ошибка при удалении лекции');
+    }
+  };
+
   return (
       <div>
-        <Header setIsAuthenticated={setIsAuthenticated} />
+        <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
         {isAuthenticated ? (
             <div>
-              <LectureList lectures={lectures} openModal={openModal} />
+              <LectureList
+                  lectures={lectures}
+                  openModal={openModal}
+                  deleteLecture={deleteLecture}
+              />
               {isModalOpen && (
                   <Modal
-                      lecture={lectures[currentLectureIndex]}
+                      lecture={currentLecture}
                       saveLecture={saveLecture}
                       closeModal={closeModal}
                   />

@@ -3,7 +3,7 @@ import './Modal.css';
 import Close from '../img/chevron-down-solid.svg';
 import { Document, Packer, Paragraph, TextRun, AlignmentType } from 'docx';
 
-const Modal = ({ isOpen, onClose, onSave, lecture }) => {
+const Modal = ({ lecture, saveLecture, closeModal }) => {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [isEditing, setIsEditing] = useState(true);
@@ -18,14 +18,14 @@ const Modal = ({ isOpen, onClose, onSave, lecture }) => {
             setText('');
             setIsEditing(true);
         }
-    }, [isOpen, lecture]);
+    }, [lecture]);
 
-    if (!isOpen) return null;
+    if (!lecture && !isEditing) return null;
 
     const handleSave = () => {
         if (title.trim() && text.trim()) {
-            onSave({ title, text });
-            onClose();
+            saveLecture({ title, text });
+            closeModal();
         }
     };
 
@@ -89,11 +89,10 @@ const Modal = ({ isOpen, onClose, onSave, lecture }) => {
         });
     };
 
-
     return (
         <div className="lecture-modal">
             <div className="lecture-modal-content">
-                <button className="close-btn" onClick={onClose}>
+                <button className="close-btn" onClick={closeModal}>
                     <img src={Close} alt="Закрыть" />
                 </button>
                 <div className="lectures-modal-text-container">
@@ -134,4 +133,3 @@ const Modal = ({ isOpen, onClose, onSave, lecture }) => {
 };
 
 export default Modal;
-/////

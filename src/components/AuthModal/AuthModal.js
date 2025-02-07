@@ -34,7 +34,6 @@ const AuthModal = ({ setIsAuthenticated }) => {
             });
     };
 
-
     const handleRegister = () => {
         const registerData = { username, password, email };
 
