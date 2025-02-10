@@ -1,4 +1,4 @@
-# LectureNote![Логотип](/Users/ttwinkleee/Documents/LectureNote/public/favicon.ico)
+# LectureNote![Логотип](public/favicon.ico)
 
 **LectureNote** - это веб-приложение для создания, управления и экспорта персональных записей с системой аутентификации пользователей. Все данные хранятся в PostgreSQL и привязаны к аккаунту.
 
