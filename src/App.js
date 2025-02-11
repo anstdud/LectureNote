@@ -116,6 +116,7 @@ const App = () => {
                   lectures={lectures}
                   openModal={openModal}
                   deleteLecture={deleteLecture}
+                  fetchLectures={fetchLectures}
               />
               {isModalOpen && (
                   <Modal

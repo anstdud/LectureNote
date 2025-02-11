@@ -53,3 +53,23 @@
     margin-right: 0;
 }
 
+.lectures-btn-import {
+    background-color: #548B74;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lectures-btn-import .circle-icon {
+    background-color: #FAF3EB;
+    color: #548B74;
+    margin-right: 10px;
+}
+
