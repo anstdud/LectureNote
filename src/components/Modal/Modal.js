@@ -49,9 +49,49 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
     };
 
     const handleExport = () => {
+        const paragraphs = text.split('\n').map((paragraph) => {
+            return new Paragraph({
+                alignment: AlignmentType.JUSTIFIED,
+                children: [
+                    new TextRun({
+                        text: paragraph,
+                        font: 'Times New Roman',
+                        size: 28,
+                    }),
+                ],
+                spacing: {
+                    line: 360,
+                    before: 0,
+                    after: 0
+                },
+                indent: { firstLine: 710 },
+                style: 'Normal',
+            });
+        });
+
         const doc = new Document({
+            styles: {
+                paragraphStyles: [{
+                    id: 'Normal',
+                    name: 'Normal',
+                    basedOn: 'Normal',
+                    next: 'Normal',
+                    quickFormat: true,
+                    paragraph: {
+                        alignment: AlignmentType.JUSTIFIED,
+                    },
+                }]
+            },
             sections: [
                 {
+                    properties: {
+                        page: {
+                            pageNumbers: {
+                                start: 1,
+                                formatType: 'decimal',
+                            },
+                        },
+                    },
                     children: [
                         new Paragraph({
                             alignment: AlignmentType.CENTER,
@@ -60,22 +100,12 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
                                     text: title,
                                     bold: true,
                                     font: 'Times New Roman',
-                                    size: 28, // 14pt
+                                    size: 28,
                                 }),
                             ],
+                            spacing: { before: 0, after: 0 },
                         }),
-                        new Paragraph({
-                            alignment: AlignmentType.JUSTIFY,
-                            children: [
-                                new TextRun({
-                                    text: text,
-                                    font: 'Times New Roman',
-                                    size: 28, // 14pt
-                                }),
-                            ],
-                            spacing: { after: 120 },
-                            indentation: { firstLine: 240 },
-                        }),
+                        ...paragraphs,
                     ],
                 },
             ],
