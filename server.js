@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import * as dotenv from "dotenv";
+import { body, validationResult } from 'express-validator';
 
 dotenv.config();
 
@@ -16,7 +17,6 @@ app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true,
 }));
-
 
 const pool = new Pool({
     user: process.env.DB_USER,
@@ -32,7 +32,16 @@ pool.connect()
 
 const JWT_SECRET = 'your_jwt_secret_key';
 
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', [
+    body('username').isLength({ min: 3 }).trim().escape(),
+    body('password').isLength({ min: 6 }).trim().escape(),
+    body('email').isEmail().normalizeEmail(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { username, password, email } = req.body;
 
     try {
@@ -53,29 +62,31 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-app.post('/api/login', async (req, res) => {
-    console.log('Запрос на вход:', req.body);
+app.post('/api/login', [
+    body('username').trim().escape(),
+    body('password').trim().escape(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { username, password } = req.body;
 
     try {
         const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
 
         if (result.rows.length === 0) {
-            console.log('Пользователь не найден');
             return res.status(401).json({ error: 'Неверный логин или пароль' });
         }
 
         const user = result.rows[0];
-        console.log('Найден пользователь:', user);
-
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
-            console.log('Пароли не совпадают');
             return res.status(401).json({ error: 'Неверный логин или пароль' });
         }
 
         const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-        console.log('Создан токен:', token);
         res.json({ token });
     } catch (err) {
         console.error('Ошибка при входе:', err);
@@ -93,18 +104,15 @@ function authenticate(req, res, next) {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.user = decoded;
-        console.log("Аутентифицированный пользователь:", decoded);
         next();
     } catch (err) {
         console.error('Ошибка токена:', err);
         res.status(401).json({ error: 'Недействительный токен' });
     }
-
 }
 
 app.get('/api/lectures', authenticate, async (req, res) => {
     const userId = req.user.id;
-    console.log('Проверка user_id:', req.user);
 
     try {
         const result = await pool.query(
@@ -118,7 +126,15 @@ app.get('/api/lectures', authenticate, async (req, res) => {
     }
 });
 
-app.post('/api/lectures', authenticate, async (req, res) => {
+app.post('/api/lectures', authenticate, [
+    body('title').trim().escape(),
+    body('text').trim().escape(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { title, text } = req.body;
     const userId = req.user.id;
 
@@ -134,7 +150,15 @@ app.post('/api/lectures', authenticate, async (req, res) => {
     }
 });
 
-app.put('/api/lectures/:id', authenticate, async (req, res) => {
+app.put('/api/lectures/:id', authenticate, [
+    body('title').trim().escape(),
+    body('text').trim().escape(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const { id } = req.params;
     const { title, text } = req.body;
     const userId = req.user.id;

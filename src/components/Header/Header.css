@@ -13,6 +13,8 @@ body {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    align-items: center;
+    padding: 0;
 }
 
 .navbar-logo {
@@ -34,11 +36,62 @@ body {
     margin-bottom: -5px;
 }
 
-.navbar-button {
+.navbar-buttons {
     display: flex;
     align-items: center;
-    margin-left: auto;
-    margin-right: 0;
+    gap: 10px;
+    margin-top: auto;
+    margin-bottom: 0;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-button {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+.search-button.open {
+    background-color: #FAF3EB;
+    transform: rotate(90deg);
+}
+
+.search-input {
+    width: 0;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: #FAF3EB;
+    border-radius: 20px;
+    font-size: 16px;
+    margin-left: 10px;
+    outline: none;
+    transition: width 0.3s, opacity 0.3s;
+    opacity: 0;
+}
+
+.search-input.open {
+    width: 200px;
+    opacity: 1;
+}
+
+.search-input:focus {
+    border-color: #201209;
+}
+
+.navbar-menu {
+    display: flex;
+    align-items: center;
 }
 
 .navbar-menu-toggle {
@@ -46,22 +99,21 @@ body {
     height: 40px;
     background: none;
     border: none;
-    font-size: 36px;
     display: flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
     border-radius: 50%;
-}
-
-.navbar-menu-toggle__icon {
-    font-size: 46px;
-    color: #201209;
-    line-height: 1;
+    transition: background-color 0.3s;
 }
 
 .navbar-menu-toggle:hover {
-    background-color: transparent;
+    background-color: #FAF3EB;
+}
+
+.navbar-menu-toggle svg {
+    width: 24px;
+    height: 24px;
 }
 
 .dropdown-menu {
@@ -75,6 +127,14 @@ body {
     padding: 0;
     width: 150px;
     z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.dropdown-menu.open {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .dropdown-menu li {
@@ -84,17 +144,6 @@ body {
 
 .dropdown-menu li:last-child {
     border-bottom: none;
-}
-
-.dropdown-menu li a {
-    color: #201209;
-    text-decoration: none;
-    font-size: 16px;
-    display: block;
-}
-
-.dropdown-menu li a:hover {
-    background-color: #FAF3EB;
 }
 
 .dropdown-menu li button {

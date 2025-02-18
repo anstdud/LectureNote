@@ -6,9 +6,11 @@ import AuthModal from './components/AuthModal/AuthModal.js';
 
 const App = () => {
   const [lectures, setLectures] = useState([]);
+  const [filteredLectures, setFilteredLectures] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLecture, setCurrentLecture] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -44,10 +46,19 @@ const App = () => {
 
       const data = await response.json();
       setLectures(data);
+      setFilteredLectures(data);
     } catch (error) {
       console.error('Ошибка запроса:', error);
       alert('Не удалось загрузить лекции');
     }
+  };
+
+  const handleSearch = (query) => {
+    setIsSearching(query.length > 0);
+    const filtered = lectures.filter(lecture =>
+        lecture.title.toLowerCase().includes(query.toLowerCase())
+    );
+    setFilteredLectures(filtered);
   };
 
   const saveLecture = async (lectureData) => {
@@ -109,14 +120,19 @@ const App = () => {
 
   return (
       <div>
-        <Header isAuthenticated={isAuthenticated} setIsAuthenticated={setIsAuthenticated} />
+        <Header
+            isAuthenticated={isAuthenticated}
+            setIsAuthenticated={setIsAuthenticated}
+            onSearch={handleSearch}
+        />
         {isAuthenticated ? (
             <div>
               <LectureList
-                  lectures={lectures}
+                  lectures={filteredLectures}
                   openModal={openModal}
                   deleteLecture={deleteLecture}
                   fetchLectures={fetchLectures}
+                  isSearching={isSearching}
               />
               {isModalOpen && (
                   <Modal

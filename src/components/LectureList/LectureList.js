@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { } from 'react';
 import './LectureList.css';
 import Book from '../img/book.svg';
 import * as mammoth from 'mammoth';
 
-const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures }) => {
+const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSearching }) => {
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -79,18 +79,22 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures }) => {
 
     return (
         <div className="lectures-list">
-            <button
-                className="lecture-item lectures-btn-import"
-                onClick={() => document.getElementById('fileInput').click()}
-            >
-                <span className="circle-icon">↑</span> Импорт из файла
-            </button>
-            <button
-                className="lecture-item lectures-btn-create"
-                onClick={() => openModal(null)}
-            >
-                <span className="circle-icon">+</span> Создать новую запись
-            </button>
+            {!isSearching && (
+                <>
+                    <button
+                        className="lecture-item lectures-btn-import"
+                        onClick={() => document.getElementById('fileInput').click()}
+                    >
+                        <span className="circle-icon">↑</span> Импорт из файла
+                    </button>
+                    <button
+                        className="lecture-item lectures-btn-create"
+                        onClick={() => openModal(null)}
+                    >
+                        <span className="circle-icon">+</span> Создать новую запись
+                    </button>
+                </>
+            )}
             <input
                 id="fileInput"
                 type="file"

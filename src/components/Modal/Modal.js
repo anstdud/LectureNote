@@ -7,6 +7,8 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [isEditing, setIsEditing] = useState(true);
+    const [isClosing, setIsClosing] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         if (lecture) {
@@ -18,14 +20,23 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
             setText('');
             setIsEditing(true);
         }
+
+        setIsOpen(true);
     }, [lecture]);
 
-    if (!lecture && !isEditing) return null;
+    const handleClose = () => {
+        setIsClosing(true);
+        setTimeout(() => {
+            closeModal();
+        }, 300);
+    };
+
+    if ((!lecture && !isEditing) || (isClosing && !isOpen)) return null;
 
     const handleSave = () => {
         if (title.trim() && text.trim()) {
             saveLecture({ title, text });
-            closeModal();
+            handleClose();
         }
     };
 
@@ -120,9 +131,9 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
     };
 
     return (
-        <div className="lecture-modal">
+        <div className={`lecture-modal ${isOpen ? 'open' : ''} ${isClosing ? 'closing' : ''}`}>
             <div className="lecture-modal-content">
-                <button className="close-btn" onClick={closeModal}>
+                <button className="close-btn" onClick={handleClose}>
                     <img src={Close} alt="Закрыть" />
                 </button>
                 <div className="lectures-modal-text-container">
