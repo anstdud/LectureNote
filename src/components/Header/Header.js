@@ -89,7 +89,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
                                 ref={searchRef}
                                 type="text"
                                 className={`search-input ${isSearchOpen ? 'open' : ''}`}
-                                placeholder="Поиск лекций..."
+                                placeholder="Поиск лекций"
                                 value={searchQuery}
                                 onChange={handleSearchChange}
                             />
