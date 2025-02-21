@@ -3,7 +3,7 @@ import pkg from 'pg';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import cors from 'cors';
-import * as dotenv from "dotenv";
+import * as dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 
 dotenv.config();
@@ -166,8 +166,8 @@ app.put('/api/lectures/:id', authenticate, [
     try {
         const result = await pool.query(
             `UPDATE notes 
-             SET title = $1, text = $2, updated_at = CURRENT_TIMESTAMP
-             WHERE id = $3 AND user_id = $4 RETURNING *`,
+       SET title = $1, text = $2, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $3 AND user_id = $4 RETURNING *`,
             [title, text, id, userId]
         );
 
@@ -200,6 +200,97 @@ app.delete('/api/lectures/:id', authenticate, async (req, res) => {
     } catch (err) {
         console.error('Ошибка при удалении лекции:', err);
         res.status(500).json({ error: 'Ошибка при удалении лекции' });
+    }
+});
+
+app.post('/api/lectures/:id/share', authenticate, async (req, res) => {
+    const { id } = req.params;
+    const userId = req.user.id;
+
+    try {
+        // 1. Проверяем, существует ли лекция в базе
+        const lectureExists = await pool.query(
+            'SELECT * FROM notes WHERE id = $1',
+            [id]
+        );
+
+        // 2. Если лекция не найдена в базе
+        if (lectureExists.rows.length === 0) {
+            return res.status(404).json({ error: 'Лекция не найдена' });
+        }
+
+        // 3. Генерация уникального кода
+        const generateCode = () => Math.random().toString(36).substr(2, 6).toUpperCase();
+        let code;
+        let exists = true;
+
+        while (exists) {
+            code = generateCode();
+            const check = await pool.query(
+                'SELECT * FROM shared_lectures WHERE code = $1',
+                [code]
+            );
+            exists = check.rows.length > 0;
+        }
+
+        // 4. Сохраняем код в shared_lectures
+        await pool.query(
+            'INSERT INTO shared_lectures (code, lecture_id, user_id) VALUES ($1, $2, $3)',
+            [code, id, userId]
+        );
+
+        res.json({ code });
+    } catch (err) {
+        console.error('Ошибка генерации кода:', err);
+        res.status(500).json({ error: 'Ошибка генерации кода' });
+    }
+});
+
+app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
+    const { code } = req.body;
+    const userId = req.user.id;
+
+    try {
+        // 1. Находим shared lecture по коду
+        const shared = await pool.query(
+            'SELECT * FROM shared_lectures WHERE code = $1',
+            [code]
+        );
+
+        if (shared.rows.length === 0) {
+            return res.status(404).json({ error: 'Неверный код доступа' });
+        }
+
+        const { lecture_id } = shared.rows[0];
+
+        // 2. Получаем оригинальную лекцию
+        const originalLecture = await pool.query(
+            'SELECT * FROM notes WHERE id = $1',
+            [lecture_id]
+        );
+
+        if (originalLecture.rows.length === 0) {
+            return res.status(404).json({ error: 'Лекция не найдена' });
+        }
+
+        const { title, text } = originalLecture.rows[0];
+
+        // 3. Добавляем лекцию
+        const result = await pool.query(
+            'INSERT INTO notes (user_id, title, text) VALUES ($1, $2, $3) RETURNING *',
+            [userId, title, text]
+        );
+
+        // 4. Удаляем использованный код
+        await pool.query(
+            'DELETE FROM shared_lectures WHERE code = $1',
+            [code]
+        );
+
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Ошибка добавления по коду:', err);
+        res.status(500).json({ error: 'Ошибка добавления лекции' });
     }
 });
 

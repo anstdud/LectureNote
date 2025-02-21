@@ -167,3 +167,71 @@ body {
 .dropdown-menu li button:focus {
     outline: none;
 }
+
+.code-container {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.code-button {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.code-button.open {
+    background-color: #FAF3EB;
+}
+
+.code-input {
+    width: 0;
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: #FAF3EB;
+    border-radius: 20px;
+    font-size: 16px;
+    margin-left: 10px;
+    outline: none;
+    transition: width 0.3s, opacity 0.3s;
+    opacity: 0;
+}
+
+.code-input.open {
+    width: 200px;
+    opacity: 1;
+}
+
+.code-input:focus {
+    border-color: #201209;
+}
+
+.code-submit-button {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+    margin-left: 10px;
+}
+
+.code-submit-button:hover {
+    background-color: #FAF3EB;
+}
+
+.code-submit-button svg {
+    width: 24px;
+    height: 24px;
+}

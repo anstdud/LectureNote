@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Header.css';
 import Logo from '../img/logo.svg';
+import PropTypes from 'prop-types';
 
-const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
+const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [username, setUsername] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -10,6 +11,10 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
     const searchRef = useRef(null);
+
+    const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
+    const [shareCode, setShareCode] = useState('');
+    const codeRef = useRef(null);
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -59,6 +64,34 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
         };
     }, []);
 
+    const handleCodeClick = () => {
+        setIsCodeInputOpen(prev => !prev);
+        if (!isCodeInputOpen) {
+            setTimeout(() => codeRef.current.focus(), 0);
+        } else {
+            setShareCode('');
+        }
+    };
+
+    const handleCodeSubmit = async () => {
+        if (shareCode.trim()) {
+            await onAddByCode(shareCode.trim());
+            setShareCode('');
+            setIsCodeInputOpen(false);
+        }
+    };
+
+    const handleCodeKeyPress = (e) => {
+        if (e.key === 'Enter') handleCodeSubmit();
+    };
+
+    Header.propTypes = {
+        isAuthenticated: PropTypes.bool.isRequired,
+        setIsAuthenticated: PropTypes.func.isRequired,
+        onSearch: PropTypes.func.isRequired,
+        onAddByCode: PropTypes.func.isRequired,
+    };
+
     return (
         <header className="header">
             <nav className="navbar" aria-label="Main">
@@ -74,12 +107,16 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
                                 onClick={handleSearchClick}
                             >
                                 {isSearchOpen ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
                                     </svg>
                                 ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
                                         <circle cx="11" cy="11" r="8"></circle>
                                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                                     </svg>
@@ -94,6 +131,41 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
                                 onChange={handleSearchChange}
                             />
                         </div>
+                        <div className="code-container">
+                            <button
+                                className={`code-button ${isCodeInputOpen ? 'open' : ''}`}
+                                onClick={handleCodeClick}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                     fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                     strokeLinejoin="round">
+                                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                                </svg>
+                            </button>
+                            <input
+                                ref={codeRef}
+                                type="text"
+                                className={`code-input ${isCodeInputOpen ? 'open' : ''}`}
+                                placeholder="Введите код"
+                                value={shareCode}
+                                onChange={(e) => setShareCode(e.target.value)}
+                                onKeyPress={handleCodeKeyPress}
+                            />
+                            {isCodeInputOpen && (
+                                <button
+                                    className="code-submit-button"
+                                    onClick={handleCodeSubmit}
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
+                                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                                        <polyline points="12 5 19 12 12 19"></polyline>
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
                         <div className="navbar-menu">
                             <button
                                 className="navbar-menu-toggle"
@@ -101,12 +173,16 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
                                 onClick={handleToggleMenu}
                             >
                                 {isDropdownOpen ? (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
                                     </svg>
                                 ) : (
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
                                         <line x1="3" y1="12" x2="21" y2="12"></line>
                                         <line x1="3" y1="6" x2="21" y2="6"></line>
                                         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -114,8 +190,12 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch }) => {
                                 )}
                             </button>
                             <ul ref={dropdownRef} className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
-                                <li><button disabled>{username}</button></li>
-                                <li><button onClick={handleLogout}>Выйти</button></li>
+                                <li>
+                                    <button disabled>{username}</button>
+                                </li>
+                                <li>
+                                    <button onClick={handleLogout}>Выйти</button>
+                                </li>
                             </ul>
                         </div>
                     </div>

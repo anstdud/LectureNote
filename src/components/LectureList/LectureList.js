@@ -1,9 +1,17 @@
-import React, { } from 'react';
+import React from 'react';
 import './LectureList.css';
 import Book from '../img/book.svg';
 import * as mammoth from 'mammoth';
+import PropTypes from 'prop-types';
 
-const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSearching }) => {
+const LectureList = ({
+                         lectures,
+                         openModal,
+                         deleteLecture,
+                         fetchLectures,
+                         isSearching,
+                         generateShareCode
+                     }) => {
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -107,23 +115,39 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
                 <div key={index} className="lecture-item">
                     <button
                         onClick={() => openModal(lecture)}
-                        className="lecture-item-btn lecture-item"
-                    >
+                        className="lecture-item-btn lecture-item">
                         <span className="circle-icon">
                             <img src={Book} alt="Значок книжки"/>
                         </span>
                         {lecture.title}
                     </button>
-                    <button
-                        className="lecture-item-delete"
-                        onClick={() => deleteLecture(lecture.id)}
-                    >
-                        Удалить
-                    </button>
+                    <div className="lecture-actions">
+                        <button
+                            className="lecture-item-share"
+                            onClick={() => generateShareCode(lecture.id)}
+                        >
+                            Поделиться
+                        </button>
+                        <button
+                            className="lecture-item-delete"
+                            onClick={() => deleteLecture(lecture.id)}
+                        >
+                            Удалить
+                        </button>
+                    </div>
                 </div>
             ))}
         </div>
     );
+};
+
+LectureList.propTypes = {
+    lectures: PropTypes.array.isRequired,
+    openModal: PropTypes.func.isRequired,
+    deleteLecture: PropTypes.func.isRequired,
+    fetchLectures: PropTypes.func.isRequired,
+    isSearching: PropTypes.bool.isRequired,
+    generateShareCode: PropTypes.func.isRequired,
 };
 
 export default LectureList;
