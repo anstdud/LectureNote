@@ -208,18 +208,15 @@ app.post('/api/lectures/:id/share', authenticate, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // 1. Проверяем, существует ли лекция в базе
         const lectureExists = await pool.query(
             'SELECT * FROM notes WHERE id = $1',
             [id]
         );
 
-        // 2. Если лекция не найдена в базе
         if (lectureExists.rows.length === 0) {
             return res.status(404).json({ error: 'Лекция не найдена' });
         }
 
-        // 3. Генерация уникального кода
         const generateCode = () => Math.random().toString(36).substr(2, 6).toUpperCase();
         let code;
         let exists = true;
@@ -233,7 +230,6 @@ app.post('/api/lectures/:id/share', authenticate, async (req, res) => {
             exists = check.rows.length > 0;
         }
 
-        // 4. Сохраняем код в shared_lectures
         await pool.query(
             'INSERT INTO shared_lectures (code, lecture_id, user_id) VALUES ($1, $2, $3)',
             [code, id, userId]
@@ -251,7 +247,6 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
     const userId = req.user.id;
 
     try {
-        // 1. Находим shared lecture по коду
         const shared = await pool.query(
             'SELECT * FROM shared_lectures WHERE code = $1',
             [code]
@@ -263,7 +258,6 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
 
         const { lecture_id } = shared.rows[0];
 
-        // 2. Получаем оригинальную лекцию
         const originalLecture = await pool.query(
             'SELECT * FROM notes WHERE id = $1',
             [lecture_id]
@@ -275,13 +269,11 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
 
         const { title, text } = originalLecture.rows[0];
 
-        // 3. Добавляем лекцию
         const result = await pool.query(
             'INSERT INTO notes (user_id, title, text) VALUES ($1, $2, $3) RETURNING *',
             [userId, title, text]
         );
 
-        // 4. Удаляем использованный код
         await pool.query(
             'DELETE FROM shared_lectures WHERE code = $1',
             [code]

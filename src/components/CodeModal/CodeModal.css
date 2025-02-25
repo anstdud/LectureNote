@@ -24,17 +24,18 @@
     color: #201209;
     margin-bottom: 15px;
     font-family: "TaylorSans", sans-serif;
+    font-weight: lighter;
 }
 
 .code-content {
     font-size: 24px;
-    font-weight: bold;
+    font-weight: lighter;
     color: #548B74;
     margin: 20px 0;
     padding: 10px;
     background: #FAF3EB;
     border-radius: 8px;
-    font-family: monospace;
+    font-family: "TaylorSans", sans-serif;
 }
 
 .copy-button {

@@ -90,6 +90,7 @@ body {
 }
 
 .navbar-menu {
+    position: relative;
     display: flex;
     align-items: center;
 }
@@ -105,6 +106,7 @@ body {
     cursor: pointer;
     border-radius: 50%;
     transition: background-color 0.3s;
+    z-index: 1001;
 }
 
 .navbar-menu-toggle:hover {
@@ -137,11 +139,6 @@ body {
     transform: translateY(0);
 }
 
-.dropdown-menu li {
-    padding: 5px 10px;
-    border-bottom: 1px solid #ddd;
-}
-
 .dropdown-menu li:last-child {
     border-bottom: none;
 }
@@ -153,7 +150,7 @@ body {
     text-decoration: none;
     display: block;
     width: 100%;
-    padding: 5px 10px;
+    padding: 10px 15px;
     font-size: 16px;
     cursor: pointer;
     text-align: left;
@@ -162,6 +159,7 @@ body {
 
 .dropdown-menu li button:hover {
     background-color: #FAF3EB;
+    border-radius: 5px;
 }
 
 .dropdown-menu li button:focus {

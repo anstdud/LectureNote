@@ -21,7 +21,8 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
         setUsername(storedUsername || '');
     }, [isAuthenticated]);
 
-    const handleToggleMenu = () => {
+    const handleToggleMenu = (e) => {
+        e.stopPropagation(); // Добавлено для предотвращения всплытия события
         setIsDropdownOpen(prev => !prev);
     };
 

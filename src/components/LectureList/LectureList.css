@@ -6,7 +6,7 @@
     background-color: unset;
     border: none;
     margin-top: 10px;
-    font-size: 18px;
+    font-size: 17px;
     font-family: "TaylorSans", sans-serif;
     position: relative;
     border-bottom: 1px solid #38303B;
@@ -40,27 +40,13 @@
     padding-right: 10px;
 }
 
-.lecture-item-delete {
-    width: 120px;
-    height: 40px;
-    background: #548B74;
-    border: none;
-    border-radius: 20px;
-    font-size: 14px;
-    color: #FAF3EB;
-    cursor: pointer;
-    margin-left: auto;
-
-    margin-right: 0;
-}
-
 .lectures-btn-import {
     background-color: #548B74;
     color: #FAF3EB;
     border: none;
     border-radius: 20px;
     padding: 10px 20px;
-    font-size: 16px;
+    font-size: 17px;
     cursor: pointer;
     margin-top: 10px;
     display: flex;
@@ -75,18 +61,78 @@
 }
 
 .lecture-actions {
+    position: relative;
     display: flex;
-    gap: 10px;
-    margin-left: auto;
+    align-items: center;
 }
 
-.lecture-item-share {
-    width: 120px;
+.menu-toggle {
+    width: 40px;
     height: 40px;
-    background: #548B74;
+    background: none;
     border: none;
-    border-radius: 20px;
-    font-size: 14px;
-    color: #FAF3EB;
     cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+    color: #548B74;
+}
+
+.menu-toggle:hover {
+    background-color: #FAF3EB;
+}
+
+.menu-toggle svg {
+    width: 24px;
+    height: 24px;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background-color: #FFFAF5;
+    border-radius: 5px;
+    list-style: none;
+    margin: 5px 0 0 0;
+    padding: 0;
+    width: 150px;
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    pointer-events: none;
+}
+
+.dropdown-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.menu-item {
+    color: #201209;
+    background: none;
+    border: none;
+    text-decoration: none;
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    font-family: "TaylorSans", sans-serif;
+    transition: background-color 0.3s;
+}
+
+.menu-item:hover {
+    background-color: #FAF3EB;
+    border-radius: 5px;
+}
+
+.menu-item:focus {
+    outline: none;
 }

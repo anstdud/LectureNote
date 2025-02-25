@@ -1,87 +1,76 @@
-import React from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './LectureList.css';
 import Book from '../img/book.svg';
 import * as mammoth from 'mammoth';
 import PropTypes from 'prop-types';
 
-const LectureList = ({
-                         lectures,
-                         openModal,
-                         deleteLecture,
-                         fetchLectures,
-                         isSearching,
-                         generateShareCode
-                     }) => {
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx')) {
-                alert('Пожалуйста, загрузите файл в формате .txt или .docx');
+const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSearching, generateShareCode }) => {
+    const [openMenuId, setOpenMenuId] = useState(null); // Состояние для управления выпадающим меню
+    const menuRefs = useRef({});
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        if (!file.name.endsWith('.txt') && !file.name.endsWith('.docx')) {
+            alert('Допустимы только .txt и .docx файлы');
+            return;
+        }
+
+        try {
+            const content = await (file.name.endsWith('.docx')
+                ? mammoth.extractRawText({ arrayBuffer: await file.arrayBuffer() }).then(r => r.value)
+                : file.text());
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                alert('Требуется авторизация');
                 return;
             }
 
-            const isDocx = file.name.endsWith('.docx');
+            await fetch('http://localhost:5001/api/lectures', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+                body: JSON.stringify({
+                    title: file.name.replace(/\.[^.]+$/, ''),
+                    text: content
+                }),
+            });
 
-            if (isDocx) {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const arrayBuffer = e.target.result;
-                    try {
-                        const result = await mammoth.extractRawText({ arrayBuffer });
-                        const content = result.value;
-                        const title = file.name.replace(/\.[^/.]+$/, "");
-                        const text = content;
+            await fetchLectures();
+        } catch (error) {
+            console.error('Ошибка:', error);
+            alert('Ошибка загрузки файла');
+        }
+    };
 
-                        const token = localStorage.getItem('token');
-                        if (!token) {
-                            alert('Необходимо войти в систему');
-                            return;
-                        }
+    const handleMenuToggle = (lectureId, e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setOpenMenuId(prev => prev === lectureId ? null : lectureId);
+    };
 
-                        const response = await fetch('http://localhost:5001/api/lectures', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${token}`,
-                            },
-                            body: JSON.stringify({ title, text }),
-                        });
+    const handleClickOutside = useCallback((e) => {
+        if (openMenuId !== null && menuRefs.current[openMenuId] && !menuRefs.current[openMenuId].contains(e.target)) {
+            setOpenMenuId(null);
+        }
+    }, [openMenuId]);
 
-                        if (!response.ok) throw new Error('Ошибка при сохранении лекции');
-                        fetchLectures();
-                    } catch (err) {
-                        console.error('Ошибка при чтении DOCX:', err);
-                        alert('Не удалось прочитать файл DOCX');
-                    }
-                };
-                reader.readAsArrayBuffer(file);
-            } else {
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    const content = e.target.result;
-                    const title = file.name.replace(/\.[^/.]+$/, "");
-                    const text = content;
+    useEffect(() => {
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [handleClickOutside]);
 
-                    const token = localStorage.getItem('token');
-                    if (!token) {
-                        alert('Необходимо войти в систему');
-                        return;
-                    }
-
-                    const response = await fetch('http://localhost:5001/api/lectures', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`,
-                        },
-                        body: JSON.stringify({ title, text }),
-                    });
-
-                    if (!response.ok) throw new Error('Ошибка при сохранении лекции');
-                    fetchLectures();
-                };
-                reader.readAsText(file);
-            }
+    const handleDelete = async (e, id) => {
+        e.stopPropagation(); // Останавливаем всплытие
+        try {
+            await deleteLecture(id);
+            setOpenMenuId(null);
+        } catch (error) {
+            console.error('Ошибка:', error);
         }
     };
 
@@ -99,41 +88,70 @@ const LectureList = ({
                         className="lecture-item lectures-btn-create"
                         onClick={() => openModal(null)}
                     >
-                        <span className="circle-icon">+</span> Создать новую запись
+                        <span className="circle-icon">+</span> Создать запись
                     </button>
                 </>
             )}
             <input
                 id="fileInput"
                 type="file"
-                style={{display: 'none'}}
+                hidden
                 onChange={handleFileUpload}
                 accept=".txt,.docx"
             />
 
-            {lectures.map((lecture, index) => (
-                <div key={index} className="lecture-item">
+            {lectures.map(lecture => (
+                <div key={lecture.id} className="lecture-item">
                     <button
-                        onClick={() => openModal(lecture)}
-                        className="lecture-item-btn lecture-item">
-                        <span className="circle-icon">
-                            <img src={Book} alt="Значок книжки"/>
-                        </span>
+                        className="lecture-item-btn"
+                        onClick={(e) => {
+                            e.stopPropagation(); // Останавливаем всплытие
+                            openModal(lecture);
+                        }}
+                    >
+            <span className="circle-icon">
+              <img src={Book} alt="Книга" />
+            </span>
                         {lecture.title}
                     </button>
+
                     <div className="lecture-actions">
                         <button
-                            className="lecture-item-share"
-                            onClick={() => generateShareCode(lecture.id)}
+                            className="menu-toggle"
+                            onClick={(e) => handleMenuToggle(lecture.id, e)}
+                            aria-label="Меню"
                         >
-                            Поделиться
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                 strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="1"/>
+                                <circle cx="12" cy="5" r="1"/>
+                                <circle cx="12" cy="19" r="1"/>
+                            </svg>
                         </button>
-                        <button
-                            className="lecture-item-delete"
-                            onClick={() => deleteLecture(lecture.id)}
+
+                        <div
+                            ref={el => menuRefs.current[lecture.id] = el}
+                            className={`dropdown-menu ${openMenuId === lecture.id ? 'open' : ''}`}
+                            onClick={(e) => e.stopPropagation()}
                         >
-                            Удалить
-                        </button>
+                            <button
+                                className="menu-item"
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Останавливаем всплытие
+                                    generateShareCode(lecture.id);
+                                    setOpenMenuId(null);
+                                }}
+                            >
+                                Поделиться
+                            </button>
+                            <button
+                                className="menu-item"
+                                onClick={(e) => handleDelete(e, lecture.id)}
+                            >
+                                Удалить
+                            </button>
+                        </div>
                     </div>
                 </div>
             ))}

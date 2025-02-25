@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header/Header.js';
 import Modal from './components/Modal/Modal.js';
 import LectureList from './components/LectureList/LectureList.js';
@@ -17,11 +17,32 @@ const App = () => {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      fetchLectures();
+  const fetchLectures = useCallback(async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('Необходимо войти в систему');
+      return;
     }
-  }, [isAuthenticated]);
+
+    try {
+      const response = await fetch(`http://localhost:5001/api/lectures?t=${Date.now()}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+
+      if (!response.ok) throw new Error('Ошибка при загрузке лекций');
+
+      const data = await response.json();
+      setLectures(data);
+      setFilteredLectures(data);
+    } catch (error) {
+      console.error('Ошибка:', error);
+      alert('Не удалось загрузить лекции');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) fetchLectures();
+  }, [isAuthenticated, fetchLectures]);
 
   const openModal = (lecture = null) => {
     setCurrentLecture(lecture);
@@ -31,39 +52,6 @@ const App = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setCurrentLecture(null);
-  };
-
-  const fetchLectures = async () => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Необходимо войти в систему');
-      return;
-    }
-
-    try {
-      const response = await fetch(`http://localhost:5001/api/lectures?t=${Date.now()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) throw new Error('Ошибка при загрузке лекций');
-
-      const data = await response.json();
-      setLectures(data);
-      setFilteredLectures(data);
-    } catch (error) {
-      console.error('Ошибка запроса:', error);
-      alert('Не удалось загрузить лекции');
-    }
-  };
-
-  const handleSearch = (query) => {
-    setIsSearching(query.length > 0);
-    const filtered = lectures.filter(lecture =>
-        lecture.title.toLowerCase().includes(query.toLowerCase())
-    );
-    setFilteredLectures(filtered);
   };
 
   const saveLecture = async (lectureData) => {
@@ -78,10 +66,8 @@ const App = () => {
           ? `http://localhost:5001/api/lectures/${currentLecture.id}`
           : 'http://localhost:5001/api/lectures';
 
-      const method = currentLecture ? 'PUT' : 'POST';
-
       const response = await fetch(url, {
-        method,
+        method: currentLecture ? 'PUT' : 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
@@ -94,7 +80,7 @@ const App = () => {
       await fetchLectures();
       closeModal();
     } catch (error) {
-      console.error('Ошибка сохранения:', error);
+      console.error('Ошибка:', error);
       alert('Ошибка при сохранении лекции');
     }
   };
@@ -109,18 +95,24 @@ const App = () => {
     try {
       const response = await fetch(`http://localhost:5001/api/lectures/${id}`, {
         method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
       if (!response.ok) throw new Error('Ошибка при удалении лекции');
 
-      await fetchLectures();
+      setLectures(prev => prev.filter(l => l.id !== id));
+      setFilteredLectures(prev => prev.filter(l => l.id !== id));
     } catch (error) {
-      console.error('Ошибка удаления:', error);
+      console.error('Ошибка:', error);
       alert('Ошибка при удалении лекции');
     }
+  };
+
+  const handleSearch = (query) => {
+    setIsSearching(!!query);
+    setFilteredLectures(lectures.filter(l =>
+        l.title.toLowerCase().includes(query.toLowerCase())
+    ));
   };
 
   const generateShareCode = async (lectureId) => {
@@ -133,15 +125,10 @@ const App = () => {
     try {
       const response = await fetch(`http://localhost:5001/api/lectures/${lectureId}/share`, {
         method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
+        headers: { 'Authorization': `Bearer ${token}` },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Ошибка генерации кода');
-      }
+      if (!response.ok) throw new Error('Ошибка генерации кода');
 
       const { code } = await response.json();
       setGeneratedCode(code);
@@ -164,16 +151,13 @@ const App = () => {
         body: JSON.stringify({ code }),
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Ошибка добавления лекции');
-      }
+      if (!response.ok) throw new Error('Ошибка добавления лекции');
 
       await fetchLectures();
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Ошибка:', error);
-      alert(error.message); // Показываем сообщение об ошибке пользователю
+      alert(error.message);
     }
   };
 
@@ -209,9 +193,7 @@ const App = () => {
                   />
               )}
               {showSuccessModal && (
-                  <SuccessModal
-                      onClose={() => setShowSuccessModal(false)}
-                  />
+                  <SuccessModal onClose={() => setShowSuccessModal(false)} />
               )}
             </div>
         ) : (
