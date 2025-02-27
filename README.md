@@ -52,21 +52,28 @@
 3. **Настройка БД**
     - Создайте БД в PostgreSQL:
 ```bash
- CREATE TABLE users (  
- id SERIAL PRIMARY KEY,  
- username VARCHAR(50) UNIQUE NOT NULL,  
- password_hash VARCHAR(255) NOT NULL,  
- email VARCHAR(255) UNIQUE NOT NULL,  
- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  
- );  
-   
- CREATE TABLE notes (  
- id SERIAL PRIMARY KEY,  
- user_id INTEGER REFERENCES users(id),  
- title VARCHAR(255) NOT NULL,  
- text TEXT NOT NULL,  
- created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  
-updated_at TIMESTAMP  
+ CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE notes (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    title VARCHAR(255) NOT NULL,
+    text TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
+);
+
+CREATE TABLE shared_lectures (
+    code VARCHAR(10) PRIMARY KEY UNIQUE NOT NULL,
+    lecture_id INT REFERENCES notes(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW()
 );
 ```
 
