@@ -90,6 +90,27 @@
     margin-bottom: 0;
 }
 
+/* Стилизация скроллбара */
+.lectures-modal-textarea::-webkit-scrollbar {
+    width: 8px;
+    background-color: #FAF3EB;
+}
+
+.lectures-modal-textarea::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background-color: rgba(84, 139, 116, 0.1);
+}
+
+.lectures-modal-textarea::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #548B74;
+    border: 1px solid #FAF3EB;
+}
+
+.lectures-modal-textarea::-webkit-scrollbar-thumb:hover {
+    background-color: #476f5c;
+}
+
 .lectures-button-container {
     display: flex;
     justify-content: space-between;
