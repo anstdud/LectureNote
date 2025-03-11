@@ -5,7 +5,7 @@ import * as mammoth from 'mammoth';
 import PropTypes from 'prop-types';
 
 const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSearching, generateShareCode }) => {
-    const [openMenuId, setOpenMenuId] = useState(null); // Состояние для управления выпадающим меню
+    const [openMenuId, setOpenMenuId] = useState(null);
     const menuRefs = useRef({});
 
     const handleFileUpload = async (e) => {
@@ -65,7 +65,7 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
     }, [handleClickOutside]);
 
     const handleDelete = async (e, id) => {
-        e.stopPropagation(); // Останавливаем всплытие
+        e.stopPropagation();
         try {
             await deleteLecture(id);
             setOpenMenuId(null);
@@ -101,19 +101,17 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
             />
 
             {lectures.map(lecture => (
-                <div key={lecture.id} className="lecture-item">
-                    <button
-                        className="lecture-item-btn"
-                        onClick={(e) => {
-                            e.stopPropagation(); // Останавливаем всплытие
-                            openModal(lecture);
-                        }}
-                    >
-            <span className="circle-icon">
-              <img src={Book} alt="Книга" />
-            </span>
+                <div
+                    key={lecture.id}
+                    className="lecture-item"
+                    onClick={() => openModal(lecture)}
+                >
+                    <div className="lecture-item-content">
+                        <span className="circle-icon">
+                            <img src={Book} alt="Книга" />
+                        </span>
                         {lecture.title}
-                    </button>
+                    </div>
 
                     <div className="lecture-actions">
                         <button
@@ -138,7 +136,7 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
                             <button
                                 className="menu-item"
                                 onClick={(e) => {
-                                    e.stopPropagation(); // Останавливаем всплытие
+                                    e.stopPropagation();
                                     generateShareCode(lecture.id);
                                     setOpenMenuId(null);
                                 }}
