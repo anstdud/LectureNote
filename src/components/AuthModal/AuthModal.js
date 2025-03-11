@@ -6,66 +6,74 @@ const AuthModal = ({ setIsAuthenticated }) => {
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
     const [isRegister, setIsRegister] = useState(false);
+    const [error, setError] = useState('');
 
-    const handleLogin = (username, password) => {
-        fetch('http://localhost:5001/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`Ошибка при входе: ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.token) {
-                    localStorage.setItem('token', data.token);
-                    localStorage.setItem('username', username);
-                    setIsAuthenticated(true);
-                } else {
-                    alert('Неверный логин или пароль');
-                }
-            })
-            .catch((error) => {
-                console.error('Ошибка соединения с сервером:', error);
-                alert('Ошибка соединения с сервером');
+    const handleLogin = async (username, password) => {
+        try {
+            const response = await fetch('http://localhost:5001/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка при входе');
+            }
+
+            const data = await response.json();
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('username', username);
+                setIsAuthenticated(true);
+            } else {
+                setError('Неверный логин или пароль');
+            }
+        } catch (err) {
+            console.error('Ошибка соединения с сервером:', err);
+            setError(err.message || 'Ошибка соединения с сервером');
+        }
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
         const registerData = { username, password, email };
 
-        fetch('http://localhost:5001/api/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(registerData),
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    console.error('Ошибка регистрации:', response.status, response.statusText);
-                    throw new Error('Ошибка регистрации');
-                }
-                return response.json();
-            })
-            .then((data) => {
-                if (data.id) {
-                    alert('Регистрация успешна');
-                } else {
-                    alert('Ошибка регистрации');
-                }
-            })
-            .catch((err) => {
-                console.error('Ошибка соединения с сервером:', err);
-                alert('Ошибка соединения с сервером');
+        try {
+            const response = await fetch('http://localhost:5001/api/register', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': 'http://localhost:3000'
+                },
+                body: JSON.stringify(registerData),
             });
+
+            const responseData = await response.json(); // Всегда парсим ответ
+
+            if (!response.ok) {
+                // Обрабатываем разные форматы ошибок
+                const errorMessage = responseData.errors
+                    ? responseData.errors.map(e => e.msg).join(', ')
+                    : responseData.error || 'Ошибка регистрации';
+
+                throw new Error(errorMessage);
+            }
+
+            if (responseData.id) {
+                alert('Регистрация успешна');
+                setIsRegister(false);
+            }
+        } catch (err) {
+            console.error('Ошибка:', err);
+            setError(err.message);
+        }
     };
 
     return (
         <div className="auth-modal">
             <div>
                 <h2>{isRegister ? 'Регистрация' : 'Вход'}</h2>
+                {error && <p className="error-message">{error}</p>}
                 <input
                     type="text"
                     placeholder="Имя пользователя"
@@ -89,7 +97,10 @@ const AuthModal = ({ setIsAuthenticated }) => {
                 <button onClick={isRegister ? handleRegister : () => handleLogin(username, password)}>
                     {isRegister ? 'Зарегистрироваться' : 'Войти'}
                 </button>
-                <button onClick={() => setIsRegister(!isRegister)}>
+                <button onClick={() => {
+                    setIsRegister(!isRegister);
+                    setError(''); // Очищаем ошибку при переключении форм
+                }}>
                     {isRegister ? 'Есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
                 </button>
             </div>

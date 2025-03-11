@@ -37,17 +37,20 @@ app.post('/api/register', [
     body('password').isLength({ min: 6 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
 ], async (req, res) => {
+    console.log('Received registration data:', req.body); // Логируем входящие данные
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+        console.log('Validation errors:', errors.array()); // Логируем ошибки валидации
         return res.status(400).json({ errors: errors.array() });
     }
 
     const { username, password, email } = req.body;
 
     try {
-        const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+        const existingUser = await pool.query('SELECT * FROM users WHERE username = $1 OR email = $2', [username, email]);
         if (existingUser.rows.length > 0) {
-            return res.status(400).json({ error: 'Пользователь с таким логином уже существует' });
+            return res.status(400).json({ error: 'Пользователь с таким логином или email уже существует' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
