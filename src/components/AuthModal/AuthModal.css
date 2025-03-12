@@ -1,0 +1,84 @@
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #F9DABD;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.auth-modal > div {
+    background-color: #FAF3EB;
+    padding: 30px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.auth-modal h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    font-weight: bold;
+    color: #38303B;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.auth-modal input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #38303B;
+    background-color: #FAF3EB;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.auth-modal input:focus {
+    border-color: #548B74;
+    outline: none;
+}
+
+.auth-modal button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 4px;
+    background-color: #548B74;
+    color: #FAF3EB;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.auth-modal button:hover {
+    background-color: #548B74;
+}
+
+.auth-modal button:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
+
+.auth-modal button + button {
+    background-color: transparent;
+    color: #548B74;
+    border: 1px solid #548B74;
+}
+
+.auth-modal button + button:hover {
+    background-color: #f1f1f1;
+}
+
+.auth-modal .error-message {
+    color: red;
+    margin-top: 10px;
+}
