@@ -118,6 +118,54 @@ body {
     height: 24px;
 }
 
+.profile-link {
+    color: #201209;
+    text-decoration: none;
+    display: block;
+    padding: 10px 15px;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.profile-link:hover {
+    background-color: #FAF3EB;
+    border-radius: 5px;
+}
+
+.close-profile-button {
+    width: 40px;
+    height: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s;
+}
+
+.close-profile-button:hover {
+    background-color: #FAF3EB;
+}
+
+.close-profile-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.profile-loading,
+.profile-error {
+    text-align: center;
+    padding: 20px;
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    font-size: 18px;
+}
+
+.profile-error {
+    color: #ff4d4f;
+}
+
 .dropdown-menu {
     position: absolute;
     top: 70px;

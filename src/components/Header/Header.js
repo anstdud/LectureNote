@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import Logo from '../img/logo.svg';
 import PropTypes from 'prop-types';
 
-const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) => {
+const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, isProfilePage }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [username, setUsername] = useState('');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -11,6 +12,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
     const searchRef = useRef(null);
+    const navigate = useNavigate();
 
     const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
     const [shareCode, setShareCode] = useState('');
@@ -22,7 +24,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
     }, [isAuthenticated]);
 
     const handleToggleMenu = (e) => {
-        e.stopPropagation(); // Добавлено для предотвращения всплытия события
+        e.stopPropagation();
         setIsDropdownOpen(prev => !prev);
     };
 
@@ -41,6 +43,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
         localStorage.removeItem('token');
         localStorage.removeItem('username');
         setIsAuthenticated(false);
+        navigate('/');
     };
 
     const handleSearchClick = () => {
@@ -86,19 +89,40 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
         if (e.key === 'Enter') handleCodeSubmit();
     };
 
-    Header.propTypes = {
-        isAuthenticated: PropTypes.bool.isRequired,
-        setIsAuthenticated: PropTypes.func.isRequired,
-        onSearch: PropTypes.func.isRequired,
-        onAddByCode: PropTypes.func.isRequired,
+    const handleCloseProfile = () => {
+        navigate('/');
     };
+
+    if (isProfilePage) {
+        return (
+            <header className="header">
+                <nav className="navbar" aria-label="Main">
+                    <div className="navbar-logo">
+                        <img className="navbar-logo__img" src={Logo} alt="Логотип" />
+                        <Link to="/" className="navbar-logo__a">LectureNote</Link>
+                    </div>
+                    <button
+                        className="close-profile-button"
+                        onClick={handleCloseProfile}
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                             fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                             strokeLinejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </nav>
+            </header>
+        );
+    }
 
     return (
         <header className="header">
             <nav className="navbar" aria-label="Main">
                 <div className="navbar-logo">
                     <img className="navbar-logo__img" src={Logo} alt="Логотип" />
-                    <a href="/" className="navbar-logo__a">LectureNote</a>
+                    <Link to="/" className="navbar-logo__a">LectureNote</Link>
                 </div>
                 {isAuthenticated && (
                     <div className="navbar-buttons">
@@ -192,7 +216,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
                             </button>
                             <ul ref={dropdownRef} className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
                                 <li>
-                                    <button disabled>{username}</button>
+                                    <Link to="/profile" className="profile-link">{username}</Link>
                                 </li>
                                 <li>
                                     <button onClick={handleLogout}>Выйти</button>
@@ -204,6 +228,14 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode }) 
             </nav>
         </header>
     );
+};
+
+Header.propTypes = {
+    isAuthenticated: PropTypes.bool.isRequired,
+    setIsAuthenticated: PropTypes.func.isRequired,
+    onSearch: PropTypes.func, // Делаем пропс необязательным
+    onAddByCode: PropTypes.func, // Делаем пропс необязательным
+    isProfilePage: PropTypes.bool,
 };
 
 export default Header;

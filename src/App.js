@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Header from './components/Header/Header.js';
 import Modal from './components/Modal/Modal.js';
 import LectureList from './components/LectureList/LectureList.js';
 import AuthModal from './components/AuthModal/AuthModal.js';
 import CodeModal from './components/CodeModal/CodeModal.js';
 import SuccessModal from './components/SuccessModal/SuccessModal.js';
+import ProfilePage from './components/ProfilePage/ProfilePage.js';
 
 const App = () => {
   const [lectures, setLectures] = useState([]);
@@ -162,44 +164,67 @@ const App = () => {
   };
 
   return (
-      <div>
-        <Header
-            isAuthenticated={isAuthenticated}
-            setIsAuthenticated={setIsAuthenticated}
-            onSearch={handleSearch}
-            onAddByCode={handleAddByCode}
-        />
-        {isAuthenticated ? (
-            <div>
-              <LectureList
-                  lectures={filteredLectures}
-                  openModal={openModal}
-                  deleteLecture={deleteLecture}
-                  fetchLectures={fetchLectures}
-                  isSearching={isSearching}
-                  generateShareCode={generateShareCode}
-              />
-              {isModalOpen && (
-                  <Modal
-                      lecture={currentLecture}
-                      saveLecture={saveLecture}
-                      closeModal={closeModal}
-                  />
-              )}
-              {showCodeModal && (
-                  <CodeModal
-                      code={generatedCode}
-                      onClose={() => setShowCodeModal(false)}
-                  />
-              )}
-              {showSuccessModal && (
-                  <SuccessModal onClose={() => setShowSuccessModal(false)} />
-              )}
-            </div>
-        ) : (
-            <AuthModal setIsAuthenticated={setIsAuthenticated} />
-        )}
-      </div>
+      <Router>
+        <div>
+          <Routes>
+            <Route path="/" element={
+              <>
+                <Header
+                    isAuthenticated={isAuthenticated}
+                    setIsAuthenticated={setIsAuthenticated}
+                    onSearch={handleSearch}
+                    onAddByCode={handleAddByCode}
+                />
+                {isAuthenticated ? (
+                    <div>
+                      <LectureList
+                          lectures={filteredLectures}
+                          openModal={openModal}
+                          deleteLecture={deleteLecture}
+                          fetchLectures={fetchLectures}
+                          isSearching={isSearching}
+                          generateShareCode={generateShareCode}
+                      />
+                      {isModalOpen && (
+                          <Modal
+                              lecture={currentLecture}
+                              saveLecture={saveLecture}
+                              closeModal={closeModal}
+                          />
+                      )}
+                      {showCodeModal && (
+                          <CodeModal
+                              code={generatedCode}
+                              onClose={() => setShowCodeModal(false)}
+                          />
+                      )}
+                      {showSuccessModal && (
+                          <SuccessModal onClose={() => setShowSuccessModal(false)} />
+                      )}
+                    </div>
+                ) : (
+                    <Navigate to="/login" replace />
+                )}
+              </>
+            } />
+            <Route path="/profile" element={
+              <>
+                <Header
+                    isAuthenticated={isAuthenticated}
+                    setIsAuthenticated={setIsAuthenticated}
+                    isProfilePage={true}
+                    onSearch={() => {}} // Добавляем пустую функцию
+                    onAddByCode={() => {}} // Добавляем пустую функцию
+                />
+                <ProfilePage />
+              </>
+            } />
+            <Route path="/login" element={
+              !isAuthenticated ? <AuthModal setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" replace />
+            } />
+          </Routes>
+        </div>
+      </Router>
   );
 };
 

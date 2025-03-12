@@ -1,0 +1,164 @@
+.profile-container {
+    min-height: calc(100vh - 60px);
+    background-color: #FAF3EB;
+}
+
+.profile-content {
+    width: 100%;
+}
+
+.profile-title {
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 24px;
+    padding: 0 20px;
+}
+
+.profile-field {
+    margin-bottom: 20px;
+}
+
+.profile-field label {
+    display: block;
+    font-family: "TaylorSans", sans-serif;
+    color: #548B74;
+    margin-bottom: 5px;
+    font-size: 16px;
+}
+
+.profile-value {
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    padding: 8px;
+    border-bottom: 1px solid #201209;
+    font-size: 18px;
+}
+
+.profile-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #201209;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    background-color: #FAF3EB;
+}
+
+.profile-input:focus {
+    outline: none;
+    border-color: #548B74;
+}
+
+.profile-buttons {
+    margin-top: 30px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    padding: 0 20px;
+}
+
+.profile-action-buttons {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 0 20px;
+}
+
+.profile-action-buttons-row {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.profile-edit-btn,
+.profile-password-btn,
+.profile-save-btn,
+.profile-cancel-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
+    transition: opacity 0.3s;
+}
+
+.profile-edit-btn {
+    background-color: #548B74;
+    color: #FAF3EB;
+}
+
+.profile-password-btn {
+    background-color: #F9DABD;
+    color: #201209;
+}
+
+.profile-save-btn {
+    background-color: #548B74;
+    color: #FAF3EB;
+}
+
+.profile-cancel-btn {
+    background-color: #F9DABD;
+    color: #201209;
+}
+
+.profile-logout-btn {
+    background: none;
+    border: none;
+    color: #201209;
+    font-family: "TaylorSans", sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 10px 25px;
+    text-decoration: none;
+    transition: opacity 0.3s;
+}
+
+.profile-logout-btn:hover {
+    opacity: 0.7;
+}
+
+.password-form {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #201209;
+}
+
+.profile-field input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #201209;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    background-color: #FAF3EB;
+}
+
+.profile-field input[type="password"]:focus {
+    outline: none;
+    border-color: #548B74;
+}
+
+.profile-loading {
+    text-align: center;
+    font-family: "TaylorSans", sans-serif;
+    color: #548B74;
+    font-size: 20px;
+    padding: 50px;
+}
+
+.profile-error {
+    text-align: center;
+    font-family: "TaylorSans", sans-serif;
+    color: #ff4d4f;
+    font-size: 18px;
+    padding: 50px;
+}

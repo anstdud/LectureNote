@@ -289,6 +289,100 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
     }
 });
 
+// Получение данных пользователя
+app.get('/api/user', authenticate, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT username, email FROM users WHERE id = $1',
+            [req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Пользователь не найден' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Ошибка получения данных:', err);
+        res.status(500).json({ error: 'Ошибка получения данных' });
+    }
+});
+
+// Обновление данных пользователя
+app.put('/api/user', authenticate, [
+    body('username').isLength({ min: 3 }).trim().escape(),
+    body('email').isEmail().normalizeEmail(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { username, email } = req.body;
+    const userId = req.user.id;
+
+    try {
+        // Проверка уникальности email
+        const emailCheck = await pool.query(
+            'SELECT id FROM users WHERE email = $1 AND id != $2',
+            [email, userId]
+        );
+        if (emailCheck.rows.length > 0) {
+            return res.status(400).json({ error: 'Email уже используется' });
+        }
+
+        const result = await pool.query(
+            `UPDATE users 
+       SET username = $1, email = $2 
+       WHERE id = $3 
+       RETURNING id, username, email`,
+            [username, email, userId]
+        );
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Ошибка обновления:', err);
+        res.status(500).json({ error: 'Ошибка обновления данных' });
+    }
+});
+
+// Обновление пароля
+app.put('/api/user/password', authenticate, [
+    body('currentPassword').trim().escape(),
+    body('newPassword').isLength({ min: 6 }).trim().escape(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.id;
+
+    try {
+        const user = await pool.query('SELECT * FROM users WHERE id = $1', [userId]);
+        if (user.rows.length === 0) {
+            return res.status(404).json({ error: 'Пользователь не найден' });
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.rows[0].password_hash);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Неверный текущий пароль' });
+        }
+
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await pool.query(
+            'UPDATE users SET password_hash = $1 WHERE id = $2',
+            [hashedPassword, userId]
+        );
+
+        res.json({ message: 'Пароль успешно изменен' });
+    } catch (err) {
+        console.error('Ошибка обновления пароля:', err);
+        res.status(500).json({ error: 'Ошибка обновления пароля' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Сервер работает на порту ${port}`);
 });
