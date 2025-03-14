@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import './ProfilePage.css';
 
 const ProfilePage = () => {
@@ -14,7 +13,6 @@ const ProfilePage = () => {
     const [passwordEditMode, setPasswordEditMode] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -38,14 +36,6 @@ const ProfilePage = () => {
 
         fetchUserData();
     }, []);
-
-    const handleLogout = () => {
-        // Очищаем все данные пользователя
-        localStorage.removeItem('token');
-        localStorage.removeItem('username');
-        // Перенаправляем на главную страницу
-        navigate('/');
-    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -238,12 +228,6 @@ const ProfilePage = () => {
                                 Сменить пароль
                             </button>
                         </div>
-                        <button
-                            className="profile-logout-btn"
-                            onClick={handleLogout}
-                        >
-                            Выйти
-                        </button>
                     </div>
                 )}
             </div>

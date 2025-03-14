@@ -213,8 +213,8 @@ const App = () => {
                     isAuthenticated={isAuthenticated}
                     setIsAuthenticated={setIsAuthenticated}
                     isProfilePage={true}
-                    onSearch={() => {}} // Добавляем пустую функцию
-                    onAddByCode={() => {}} // Добавляем пустую функцию
+                    onSearch={() => {}}
+                    onAddByCode={() => {}}
                 />
                 <ProfilePage />
               </>

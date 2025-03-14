@@ -233,8 +233,8 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
 Header.propTypes = {
     isAuthenticated: PropTypes.bool.isRequired,
     setIsAuthenticated: PropTypes.func.isRequired,
-    onSearch: PropTypes.func, // Делаем пропс необязательным
-    onAddByCode: PropTypes.func, // Делаем пропс необязательным
+    onSearch: PropTypes.func,
+    onAddByCode: PropTypes.func,
     isProfilePage: PropTypes.bool,
 };
 

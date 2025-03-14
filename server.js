@@ -289,7 +289,6 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
     }
 });
 
-// Получение данных пользователя
 app.get('/api/user', authenticate, async (req, res) => {
     try {
         const result = await pool.query(
@@ -308,7 +307,6 @@ app.get('/api/user', authenticate, async (req, res) => {
     }
 });
 
-// Обновление данных пользователя
 app.put('/api/user', authenticate, [
     body('username').isLength({ min: 3 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
@@ -346,7 +344,6 @@ app.put('/api/user', authenticate, [
     }
 });
 
-// Обновление пароля
 app.put('/api/user/password', authenticate, [
     body('currentPassword').trim().escape(),
     body('newPassword').isLength({ min: 6 }).trim().escape(),
