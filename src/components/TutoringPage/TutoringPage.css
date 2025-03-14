@@ -1,0 +1,309 @@
+.custom-alert {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.95rem;
+    z-index: 1000;
+    animation: slideIn 0.3s ease-out;
+}
+
+.custom-alert.success {
+    background: #548B74;
+    color: #FFFAF5;
+    border: 2px solid #467a63;
+}
+
+.custom-alert.error {
+    background: #ff4d4f;
+    color: #FFFAF5;
+    border: 2px solid #e04345;
+}
+
+.alert-icon {
+    font-size: 1.2rem;
+}
+
+.tutors-list {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+}
+
+.tutor-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.schedule-button {
+    background: #548B74;
+    color: #FAF3EB;
+    padding: 0.8rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.schedule-button:hover {
+    background: #467a63;
+    transform: translateY(-1px);
+}
+
+.booking-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #FAF3EB;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 340px;
+}
+
+.custom-calendar {
+    width: 300px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9em;
+}
+
+.react-calendar__navigation {
+    margin-bottom: 8px !important;
+}
+
+.react-calendar__month-view__weekdays {
+    font-size: 0.8em;
+    margin-bottom: 4px;
+}
+
+.react-calendar__tile {
+    padding: 6px 0;
+    font-size: 0.85em;
+}
+
+.react-calendar__month-view__days {
+    gap: 2px;
+}
+
+.time-input {
+    width: 100%;
+    padding: 0.6rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9em;
+    margin-bottom: 1rem;
+}
+
+.modal-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.confirm-button {
+    background: #548B74;
+    color: white;
+    flex: 1;
+}
+
+.cancel-button {
+    background: #201209;
+    color: #FFFAF5;
+    flex: 1;
+}
+
+.confirm-button, .cancel-button {
+    width: 50%;
+    height: 30px;
+    border-radius: 6px;
+    border: none;
+}
+
+.teacher-view {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr 1.5fr;
+}
+
+.teacher-profile input {
+    width: 100%;
+    padding: 0.8rem;
+    margin: 0.5rem 0;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+}
+
+.submit-button {
+    background: #548B74;
+    color: #FFFAF5;
+    padding: 1rem;
+    width: 100%;
+    margin-top: 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submit-button:hover {
+    background: #467a63;
+}
+
+.edit-button {
+    background: #548B74;
+    color: white;
+}
+
+.delete-button {
+    background: #201209;
+    color: #FFFAF5;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.profile-actions button {
+    padding: 0.8rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.profile-actions button:hover {
+    opacity: 0.9;
+}
+
+.calendar-container {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.bookings-list {
+    background: #FFFAF5;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    flex: 1;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.booking-item {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: #FAF3EB;
+    border-radius: 8px;
+}
+
+.available-days-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 1rem 0;
+}
+
+.available-days-container > label:first-child {
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.available-days-container label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0f0f0;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.available-days-container input[type="checkbox"] {
+    margin: 0;
+}
+
+.available-days-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 1rem 0;
+}
+
+.available-days-container > label:first-child {
+    flex-basis: 100%;
+    margin-bottom: 0.5rem;
+}
+
+.available-days-container label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: #f0f0f0;
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.available-days-container label:hover {
+    background-color: #e0e0e0;
+}
+
+.available-days-container input[type="checkbox"] {
+    margin: 0;
+    cursor: pointer;
+}
+
+.cancel-booking-button {
+    background: #201209;
+    color: #FAF3EB;
+    padding: 0.5rem 1rem;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 0.5rem;
+}
+
+.cancel-booking-button:hover {
+    opacity: 0.9;
+}
+
+.booking-marker {
+    width: 6px;
+    height: 6px;
+    background-color: #548B74;
+    border-radius: 50%;
+    margin: 2px auto;
+}
+
+@keyframes slideIn {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+}
+
+.tutoring-container h2 {
+    text-align: center;
+    /*margin-top: 1.5rem; !* Отступ сверху *!*/
+}
+
+.teacher-calendar h3 {
+    text-align: center;
+    margin-bottom: 20px;
+
+    /*margin-top: 1.5rem; !* Отступ сверху *!*/
+}

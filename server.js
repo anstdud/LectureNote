@@ -36,6 +36,7 @@ app.post('/api/register', [
     body('username').isLength({ min: 3 }).trim().escape(),
     body('password').isLength({ min: 6 }).trim().escape(),
     body('email').isEmail().normalizeEmail(),
+    body('role').optional().isIn(['student', 'teacher', 'admin'])
 ], async (req, res) => {
     console.log('Received registration data:', req.body); // Логируем входящие данные
 
@@ -45,7 +46,7 @@ app.post('/api/register', [
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, password, email } = req.body;
+    const { username, password, email, role = 'student' } = req.body;
 
     try {
         const existingUser = await pool.query('SELECT * FROM users WHERE username = $1 OR email = $2', [username, email]);
@@ -55,8 +56,8 @@ app.post('/api/register', [
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (username, password_hash, email) VALUES ($1, $2, $3) RETURNING *',
-            [username, hashedPassword, email]
+            'INSERT INTO users (username, password_hash, email, role) VALUES ($1, $2, $3, $4) RETURNING *',
+            [username, hashedPassword, email, role] // Добавлено role
         );
         res.status(201).json(result.rows[0]);
     } catch (err) {
@@ -89,11 +90,268 @@ app.post('/api/login', [
             return res.status(401).json({ error: 'Неверный логин или пароль' });
         }
 
-        const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token });
+        // Добавляем роль в токен
+        const token = jwt.sign({
+            id: user.id,
+            username: user.username,
+            role: user.role // Добавлено
+        }, JWT_SECRET, { expiresIn: '1h' });
+        res.json({ token, role: user.role }); // Добавлено
     } catch (err) {
         console.error('Ошибка при входе:', err);
         res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Новые эндпоинты для репетиторства
+app.get('/api/tutoring', authenticate, async (req, res) => {
+    try {
+        if (req.user.role === 'student') {
+            const result = await pool.query(`
+                SELECT u.id, u.username, t.subject, t.price 
+                FROM tutors t
+                JOIN users u ON t.user_id = u.id
+            `);
+            res.json(result.rows);
+        } else if (req.user.role === 'teacher') {
+            const result = await pool.query(`
+                SELECT b.id, u.username, b.datetime 
+                FROM bookings b
+                JOIN users u ON b.student_id = u.id
+                WHERE b.tutor_id = $1
+            `, [req.user.id]);
+            res.json(result.rows);
+        }
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.post('/api/tutoring', authenticate, [
+    body('tutorId').isNumeric(),
+    body('datetime').isISO8601(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        console.log('Validation errors:', errors.array()); // Логируем ошибки валидации
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    if (req.user.role !== 'student') {
+        console.log('User role is not student:', req.user.role); // Логируем роль пользователя
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    try {
+        const { tutorId, datetime } = req.body;
+        console.log('Received booking data:', { tutorId, datetime }); // Логируем полученные данные
+
+        // Проверка, что время не занято
+        const existingBooking = await pool.query(
+            'SELECT 1 FROM bookings WHERE tutor_id = $1 AND datetime = $2',
+            [tutorId, datetime]
+        );
+
+        if (existingBooking.rows.length > 0) {
+            return res.status(400).json({ error: 'Это время уже занято' });
+        }
+
+        const result = await pool.query(
+            'INSERT INTO bookings (student_id, tutor_id, datetime) VALUES ($1, $2, $3) RETURNING *',
+            [req.user.id, tutorId, datetime]
+        );
+
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Создание профиля преподавателя
+app.post('/api/tutor', authenticate, [
+    body('fullName').trim().escape(),
+    body('subject').trim().escape(),
+    body('price').isNumeric(),
+    body('availableDays').isArray(),
+    body('availableTime').isObject(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    // Проверка роли пользователя
+    if (req.user.role !== 'teacher') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    const { fullName, subject, price, availableDays, availableTime } = req.body;
+
+    try {
+        // Проверяем существование записи
+        const existing = await pool.query(
+            'SELECT 1 FROM tutors WHERE user_id = $1',
+            [req.user.id]
+        );
+
+        if (existing.rows.length > 0) {
+            // Обновление
+            await pool.query(
+                `UPDATE tutors 
+                 SET full_name = $1, subject = $2, price = $3, available_days = $4, available_time = $5
+                 WHERE user_id = $6`,
+                [fullName, subject, price, availableDays, availableTime, req.user.id]
+            );
+        } else {
+            // Создание
+            await pool.query(
+                `INSERT INTO tutors (user_id, full_name, subject, price, available_days, available_time)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [req.user.id, fullName, subject, price, availableDays, availableTime]
+            );
+        }
+
+        res.json({ message: 'Профиль сохранен' });
+    } catch (err) {
+        console.error('Ошибка в /api/tutor:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+// Получение списка преподавателей
+app.get('/api/tutor', authenticate, async (req, res) => {
+    if (req.user.role !== 'teacher') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT 
+                full_name AS "fullName",
+                subject,
+                price,
+                available_days AS "availableDays",
+                available_time AS "availableTime"
+            FROM tutors 
+            WHERE user_id = $1
+        `, [req.user.id]);
+
+        if (result.rows.length === 0) return res.json({});
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// В серверный код (index.js) добавляем новый эндпоинт
+app.get('/api/tutors', authenticate, async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                u.id,
+                t.full_name AS "fullName",
+                t.subject,
+                t.price,
+                t.available_days AS "availableDays",
+                t.available_time AS "availableTime"
+            FROM tutors t
+            JOIN users u ON t.user_id = u.id
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+// Добавляем новые эндпоинты
+app.put('/api/tutor', authenticate, [
+    body('subject').trim().escape(),
+    body('price').isNumeric(),
+], async (req, res) => {
+    if (req.user.role !== 'teacher') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    try {
+        const { subject, price } = req.body;
+        await pool.query(
+            'UPDATE tutors SET subject = $1, price = $2 WHERE user_id = $3',
+            [subject, price, req.user.id]
+        );
+        res.json({ message: 'Профиль обновлен' });
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.delete('/api/tutor', authenticate, async (req, res) => {
+    if (req.user.role !== 'teacher') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    try {
+        await pool.query('DELETE FROM tutors WHERE user_id = $1', [req.user.id]);
+        res.json({ message: 'Профиль удален' });
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.get('/api/bookings', authenticate, async (req, res) => {
+    try {
+        const result = await pool.query(
+            `SELECT b.id, u.username, b.datetime 
+             FROM bookings b
+             JOIN users u ON b.student_id = u.id
+             WHERE b.tutor_id = $1
+             ORDER BY b.datetime DESC`,
+            [req.user.id]
+        );
+
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.get('/api/bookings/occupied', authenticate, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT datetime FROM bookings WHERE tutor_id = $1',
+            [req.user.id]
+        );
+
+        res.json(result.rows.map(row => row.datetime));
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+////////////////////////////////////
+app.delete('/api/bookings/:id', authenticate, async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const result = await pool.query(
+            'DELETE FROM bookings WHERE id = $1 AND (student_id = $2 OR tutor_id = $2) RETURNING *',
+            [id, req.user.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Запись не найдена или у вас нет прав на ее удаление' });
+        }
+
+        res.json({ message: 'Запись успешно отменена' });
+    } catch (err) {
+        console.error('Ошибка при отмене записи:', err);
+        res.status(500).json({ error: 'Ошибка при отмене записи' });
     }
 });
 

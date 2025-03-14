@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import './AuthModal.css';
 
-const AuthModal = ({ setIsAuthenticated }) => {
+const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [email, setEmail] = useState('');
+    const [role, setRole] = useState('student');
     const [isRegister, setIsRegister] = useState(false);
     const [error, setError] = useState('');
 
-    const handleLogin = async (username, password) => {
+    const handleLogin = async (e) => {
         try {
             const response = await fetch('http://localhost:5001/api/login', {
                 method: 'POST',
@@ -21,14 +22,13 @@ const AuthModal = ({ setIsAuthenticated }) => {
                 throw new Error(errorData.error || 'Ошибка при входе');
             }
 
-            const data = await response.json();
-            if (data.token) {
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('username', username);
-                setIsAuthenticated(true);
-            } else {
-                setError('Неверный логин или пароль');
-            }
+            const { token, role } = await response.json();
+            localStorage.setItem('token', token);
+            localStorage.setItem('username', username);
+            localStorage.setItem('role', role);
+            setIsAuthenticated(true);
+            setUserRole(role);
+
         } catch (err) {
             console.error('Ошибка соединения с сервером:', err);
             setError(err.message || 'Ошибка соединения с сервером');
@@ -36,7 +36,7 @@ const AuthModal = ({ setIsAuthenticated }) => {
     };
 
     const handleRegister = async () => {
-        const registerData = { username, password, email };
+        const registerData = { username, password, email, role };
 
         try {
             const response = await fetch('http://localhost:5001/api/register', {
@@ -48,14 +48,12 @@ const AuthModal = ({ setIsAuthenticated }) => {
                 body: JSON.stringify(registerData),
             });
 
-            const responseData = await response.json(); // Всегда парсим ответ
+            const responseData = await response.json();
 
             if (!response.ok) {
-                // Обрабатываем разные форматы ошибок
                 const errorMessage = responseData.errors
                     ? responseData.errors.map(e => e.msg).join(', ')
                     : responseData.error || 'Ошибка регистрации';
-
                 throw new Error(errorMessage);
             }
 
@@ -87,19 +85,29 @@ const AuthModal = ({ setIsAuthenticated }) => {
                     onChange={(e) => setPassword(e.target.value)}
                 />
                 {isRegister && (
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                    />
+                    <>
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <select
+                            value={role}
+                            onChange={(e) => setRole(e.target.value)}
+                            className="role-select"
+                        >
+                            <option value="student">Студент</option>
+                            <option value="teacher">Преподаватель</option>
+                        </select>
+                    </>
                 )}
-                <button onClick={isRegister ? handleRegister : () => handleLogin(username, password)}>
+                <button onClick={isRegister ? handleRegister : handleLogin}>
                     {isRegister ? 'Зарегистрироваться' : 'Войти'}
                 </button>
                 <button onClick={() => {
                     setIsRegister(!isRegister);
-                    setError(''); // Очищаем ошибку при переключении форм
+                    setError('');
                 }}>
                     {isRegister ? 'Есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
                 </button>

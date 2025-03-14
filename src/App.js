@@ -7,6 +7,7 @@ import AuthModal from './components/AuthModal/AuthModal.js';
 import CodeModal from './components/CodeModal/CodeModal.js';
 import SuccessModal from './components/SuccessModal/SuccessModal.js';
 import ProfilePage from './components/ProfilePage/ProfilePage.js';
+import TutoringPage from './components/TutoringPage/TutoringPage.js';
 
 const App = () => {
   const [lectures, setLectures] = useState([]);
@@ -18,6 +19,15 @@ const App = () => {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
+  const [userRole, setUserRole] = useState('');
+
+  // Инициализация роли при загрузке
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
+    if (storedRole) {
+      setUserRole(storedRole);
+    }
+  }, []);
 
   const fetchLectures = useCallback(async () => {
     const token = localStorage.getItem('token');
@@ -207,6 +217,24 @@ const App = () => {
                 )}
               </>
             } />
+
+            <Route path="/tutoring" element={
+              <>
+                <Header
+                    isAuthenticated={isAuthenticated}
+                    setIsAuthenticated={setIsAuthenticated}
+                    onSearch={handleSearch}
+                    onAddByCode={handleAddByCode}
+                    isProfilePage={true} // Добавляем этот пропс
+                />
+                {isAuthenticated ? (
+                    <TutoringPage userRole={userRole} />
+                ) : (
+                    <Navigate to="/login" replace />
+                )}
+              </>
+            } />
+
             <Route path="/profile" element={
               <>
                 <Header
@@ -219,9 +247,17 @@ const App = () => {
                 <ProfilePage />
               </>
             } />
+
             <Route path="/login" element={
-              !isAuthenticated ? <AuthModal setIsAuthenticated={setIsAuthenticated} /> : <Navigate to="/" replace />
-            } />
+              !isAuthenticated ? (
+                  <AuthModal
+                      setIsAuthenticated={setIsAuthenticated}
+                      setUserRole={setUserRole}
+                  />
+              ) : (
+                  <Navigate to="/" replace />
+              )}
+            />
           </Routes>
         </div>
       </Router>

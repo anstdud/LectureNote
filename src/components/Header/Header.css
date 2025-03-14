@@ -166,6 +166,25 @@ body {
     color: #ff4d4f;
 }
 
+.user-role {
+    display: block;
+    font-size: 0.8em;
+    color: #548B74;
+    margin-top: 5px;
+}
+
+.tutoring-link {
+    color: #201209;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.tutoring-link:hover {
+    background-color: #FAF3EB;
+}
+
 .dropdown-menu {
     position: absolute;
     top: 70px;

@@ -6,21 +6,22 @@ import PropTypes from 'prop-types';
 
 const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, isProfilePage }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [username, setUsername] = useState('');
+    const [username] = useState(localStorage.getItem('username') || '');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
     const searchRef = useRef(null);
     const navigate = useNavigate();
+    const [userRole, setUserRole] = useState('');
 
     const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
     const [shareCode, setShareCode] = useState('');
     const codeRef = useRef(null);
 
     useEffect(() => {
-        const storedUsername = localStorage.getItem('username');
-        setUsername(storedUsername || '');
+        const storedRole = localStorage.getItem('role');
+        setUserRole(storedRole || '');
     }, [isAuthenticated]);
 
     const handleToggleMenu = (e) => {
@@ -214,9 +215,15 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
                                     </svg>
                                 )}
                             </button>
-                            <ul ref={dropdownRef} className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
+                            <ul className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
                                 <li>
-                                    <Link to="/profile" className="profile-link">{username}</Link>
+                                    <Link to="/profile" className="profile-link">
+                                        {username}
+                                        <span className="user-role">({userRole})</span>
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link to="/tutoring" className="tutoring-link">Репетиторство</Link>
                                 </li>
                                 <li>
                                     <button onClick={handleLogout}>Выйти</button>

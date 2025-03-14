@@ -82,3 +82,20 @@
     color: red;
     margin-top: 10px;
 }
+
+.role-select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #548B74;
+    border-radius: 4px;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
+    color: #201209;
+    background-color: #FAF3EB;
+}
+
+.role-select:focus {
+    outline: none;
+    border-color: #548B74;
+}

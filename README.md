@@ -74,6 +74,20 @@ CREATE TABLE shared_lectures (
     user_id INT REFERENCES users(id),
     created_at TIMESTAMP DEFAULT NOW()
 );
+CREATE TABLE tutors (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id),
+    subject VARCHAR(100) NOT NULL,
+    price NUMERIC NOT NULL
+);
+CREATE TABLE bookings (
+    id SERIAL PRIMARY KEY,
+    student_id INTEGER REFERENCES users(id),
+    tutor_id INTEGER REFERENCES users(id),
+    datetime TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+    ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'student';
 ```
 
 - Настройте подключение в `.env`:
