@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { showCustomAlert } from '../Notifications/Notifications.js';
 import './AuthModal.css';
 
 const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
@@ -10,6 +11,7 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
     const [error, setError] = useState('');
 
     const handleLogin = async (e) => {
+        e.preventDefault();
         try {
             const response = await fetch('http://localhost:5001/api/login', {
                 method: 'POST',
@@ -28,14 +30,16 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
             localStorage.setItem('role', role);
             setIsAuthenticated(true);
             setUserRole(role);
+            showCustomAlert('Вход выполнен успешно!');
 
         } catch (err) {
             console.error('Ошибка соединения с сервером:', err);
-            setError(err.message || 'Ошибка соединения с сервером');
+            showCustomAlert(err.message || 'Ошибка соединения с сервером', true);
         }
     };
 
-    const handleRegister = async () => {
+    const handleRegister = async (e) => {
+        e.preventDefault();
         const registerData = { username, password, email, role };
 
         try {
@@ -58,12 +62,12 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
             }
 
             if (responseData.id) {
-                alert('Регистрация успешна');
+                showCustomAlert('Регистрация успешна!');
                 setIsRegister(false);
             }
         } catch (err) {
             console.error('Ошибка:', err);
-            setError(err.message);
+            showCustomAlert(err.message, true);
         }
     };
 

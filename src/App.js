@@ -21,11 +21,17 @@ const App = () => {
   const [generatedCode, setGeneratedCode] = useState('');
   const [userRole, setUserRole] = useState('');
 
-  // Инициализация роли при загрузке
   useEffect(() => {
-    const storedRole = localStorage.getItem('role');
-    if (storedRole) {
-      setUserRole(storedRole);
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = token.split('.')[1];
+        const decoded = JSON.parse(atob(payload));
+        setUserRole(decoded.role);
+        localStorage.setItem('role', decoded.role);
+      } catch (error) {
+        console.error('Ошибка декодирования токена:', error);
+      }
     }
   }, []);
 
@@ -225,7 +231,7 @@ const App = () => {
                     setIsAuthenticated={setIsAuthenticated}
                     onSearch={handleSearch}
                     onAddByCode={handleAddByCode}
-                    isProfilePage={true} // Добавляем этот пропс
+                    isProfilePage={true}
                 />
                 {isAuthenticated ? (
                     <TutoringPage userRole={userRole} />

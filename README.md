@@ -75,13 +75,13 @@ CREATE TABLE shared_lectures (
     created_at TIMESTAMP DEFAULT NOW()
 );
 CREATE TABLE tutors (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER REFERENCES users(id),
-    subject VARCHAR(100) NOT NULL,
-    price NUMERIC NOT NULL,
-    full_name VARCHAR(255),
-    available_days TEXT[],
-    available_time JSONB
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) UNIQUE,
+  full_name VARCHAR(255),
+  subject VARCHAR(100),
+  price NUMERIC,
+  available_days VARCHAR(3)[],
+  available_time JSONB
 );
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,

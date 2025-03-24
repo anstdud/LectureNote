@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { showCustomAlert } from '../Notifications/Notifications.js';
 
 const Auth = ({ onLogin, onRegister }) => {
     const [username, setUsername] = useState('');

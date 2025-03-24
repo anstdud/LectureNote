@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { showCustomAlert } from './Notifications/Notifications.js';
 
 const AccessLecture = ({ onLectureAccess }) => {
     const [code, setCode] = useState('');
@@ -8,7 +9,7 @@ const AccessLecture = ({ onLectureAccess }) => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                alert('Необходимо авторизоваться');
+                showCustomAlert('Необходимо авторизоваться', true);
                 return;
             }
 
@@ -24,9 +25,10 @@ const AccessLecture = ({ onLectureAccess }) => {
             }
 
             const data = await response.json();
-            onLectureAccess(data); // Вызов функции onLectureAccess
+            onLectureAccess(data);
+            showCustomAlert('Лекция успешно открыта!');
         } catch (error) {
-            alert(error.message || 'Неверный код или срок действия истек');
+            showCustomAlert(error.message || 'Неверный код или срок действия истек', true);
         }
     };
 

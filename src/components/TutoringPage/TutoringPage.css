@@ -78,28 +78,63 @@
     font-size: 0.9em;
 }
 
-.react-calendar__navigation {
-    margin-bottom: 8px !important;
+.react-calendar {
+    width: 100%;
+    max-width: 400px;
+    border: none;
+    font-family: inherit;
+    background-color: #F9DABD;
 }
 
 .react-calendar__month-view__weekdays {
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
     font-size: 0.8em;
-    margin-bottom: 4px;
+    color: #333;
 }
 
-.react-calendar__tile {
-    padding: 6px 0;
-    font-size: 0.85em;
+.react-calendar__month-view__weekdays__weekday {
+    padding: 0.5em;
 }
 
-.react-calendar__month-view__days {
-    gap: 2px;
+.react-calendar__month-view__days__day {
+    padding: 0.5em;
+    font-size: 0.9em;
+}
+
+.react-calendar__month-view__days__day--weekend {
+    color: #467a63;
+}
+
+.react-calendar__tile--now {
+    background: #201209;
+}
+
+.react-calendar__tile--active {
+    background: #548B74;
+    color: #FAF3EB;
+}
+
+.react-calendar__navigation button {
+    min-width: 44px;
+    background: none;
+    font-size: 1em;
+    margin-top: 8px;
+}
+
+.react-calendar__navigation__label {
+    font-weight: bold;
+}
+
+.react-calendar__tile:disabled {
+    background-color: #FAF3EB;
+    color: #F9DABD;
 }
 
 .time-input {
     width: 100%;
     padding: 0.6rem;
-    border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 0.9em;
     margin-bottom: 1rem;
@@ -113,7 +148,7 @@
 
 .confirm-button {
     background: #548B74;
-    color: white;
+    color: #FAF3EB;
     flex: 1;
 }
 
@@ -134,6 +169,7 @@
     display: grid;
     gap: 1.5rem;
     grid-template-columns: 1fr 1.5fr;
+    margin-top: 2rem;
 }
 
 .teacher-profile input {
@@ -142,6 +178,123 @@
     margin: 0.5rem 0;
     border: 2px solid #ddd;
     border-radius: 6px;
+    font-family: "TaylorSans", sans-serif;
+    font-size: 14px;
+}
+
+.teacher-profile {
+    background: #FFFAF5;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.teacher-profile h3 {
+    color: #201209;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #F9DABD;
+}
+
+.profile-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.profile-info-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile-info-label {
+    font-size: 0.9rem;
+    color: #6D6D6D;
+    margin-bottom: 0.3rem;
+}
+
+.profile-info-value {
+    font-size: 1.1rem;
+    color: #201209;
+    font-weight: 500;
+    padding: 0.5rem;
+    background: #FAF3EB;
+    border-radius: 6px;
+}
+
+.availability-section {
+    margin-bottom: 2rem;
+}
+
+.availability-section h4 {
+    font-size: 1.1rem;
+    color: #201209;
+    margin-bottom: 0.8rem;
+}
+
+.available-days-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.day-pill {
+    background: #548B74;
+    color: #FAF3EB;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+.time-range {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: #201209;
+}
+
+.profile-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #F9DABD;
+}
+
+.edit-button {
+    background: #548B74;
+    color: #FAF3EB;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.delete-button {
+    background: #201209;
+    color: #FFFAF5;
+    padding: 0.7rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.edit-button:hover, .delete-button:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
 .submit-button {
@@ -162,7 +315,7 @@
 
 .edit-button {
     background: #548B74;
-    color: white;
+    color: #FAF3EB;
 }
 
 .delete-button {
@@ -195,18 +348,34 @@
 }
 
 .bookings-list {
-    background: #FFFAF5;
-    padding: 1.5rem;
     border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     flex: 1;
     max-height: 400px;
     overflow-y: auto;
 }
 
+.bookings-list::-webkit-scrollbar {
+    width: 8px;
+    background-color: #FAF3EB;
+}
+
+.bookings-list::-webkit-scrollbar-track {
+    background-color: rgba(84, 139, 116, 0.1);
+    border-radius: 4px;
+}
+
+.bookings-list::-webkit-scrollbar-thumb {
+    background: #548B74;
+    border-radius: 4px;
+    border: 1px solid #FAF3EB;
+}
+
+.bookings-list::-webkit-scrollbar-thumb:hover {
+    background: #476f5c;
+}
+
 .booking-item {
     margin-bottom: 1rem;
-    padding: 1rem;
     background: #FAF3EB;
     border-radius: 8px;
 }
@@ -214,59 +383,55 @@
 .available-days-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
     align-items: center;
     margin: 1rem 0;
 }
 
 .available-days-container > label:first-child {
     flex-basis: 100%;
-    margin-bottom: 0.5rem;
+    margin-bottom: 8px;
+    font-weight: 500;
 }
 
 .available-days-container label {
     display: flex;
     align-items: center;
-    gap: 5px;
-    background: #f0f0f0;
-    padding: 5px 10px;
-    border-radius: 20px;
+    gap: 6px;
+    padding: 6px 8px;
+    margin-right: 0;
+    cursor: pointer;
+    background: #FAF3EB;
+    border-radius: 4px;
+    transition: all 0.2s;
 }
 
 .available-days-container input[type="checkbox"] {
-    margin: 0;
-}
-
-.available-days-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 1rem 0;
-}
-
-.available-days-container > label:first-child {
-    flex-basis: 100%;
-    margin-bottom: 0.5rem;
-}
-
-.available-days-container label {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    background: #f0f0f0;
-    padding: 8px 12px;
-    border-radius: 20px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #548B74;
+    border-radius: 4px;
+    outline: none;
     cursor: pointer;
-    transition: background-color 0.2s;
+    position: relative;
+    transition: all 0.2s;
 }
 
-.available-days-container label:hover {
-    background-color: #e0e0e0;
+.available-days-container input[type="checkbox"]:checked {
+    background-color: #548B74;
 }
 
-.available-days-container input[type="checkbox"] {
-    margin: 0;
-    cursor: pointer;
+.available-days-container input[type="checkbox"]:checked::after {
+    content: "✓";
+    position: absolute;
+    color: #FAF3EB;
+    font-size: 13px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .cancel-booking-button {
@@ -277,6 +442,7 @@
     cursor: pointer;
     transition: opacity 0.2s;
     margin-top: 0.5rem;
+    border-radius: 6px;
 }
 
 .cancel-booking-button:hover {
@@ -291,6 +457,437 @@
     margin: 2px auto;
 }
 
+.teacher-calendar {
+    background: #FFFAF5;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #F9DABD;
+}
+
+.calendar-legend {
+    display: flex;
+    gap: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.legend-marker {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+}
+
+.legend-marker.booked {
+    background: #548B74;
+}
+
+.calendar-container {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 1.5rem;
+}
+
+.calendar-wrapper {
+    background: #FAF3EB;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.bookings-list-container {
+    background: #FAF3EB;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.bookings-list-header {
+    padding: 0.5rem 0;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #F9DABD;
+}
+
+.bookings-list-header h4 {
+    color: #201209;
+    font-size: 1.1rem;
+}
+
+.bookings-list {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.booking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: #FFFAF5;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.booking-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.booking-details {
+    flex: 1;
+}
+
+.booking-student, .booking-time {
+    margin: 0.25rem 0;
+    color: #201209;
+}
+
+.cancel-booking-button {
+    background: #201209;
+    color: #FAF3EB;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    margin-left: 1rem;
+}
+
+.cancel-booking-button:hover {
+    background: #548B74;
+}
+
+.no-bookings {
+    text-align: center;
+    color: #6D6D6D;
+    padding: 2rem 0;
+}
+
+.booking-marker {
+    width: 6px;
+    height: 6px;
+    background-color: #548B74;
+    border-radius: 50%;
+    margin: 2px auto 0;
+}
+
+.student-view {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.teacher-calendar {
+    background: #FFFAF5;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.bookings-list-container {
+    background: #FAF3EB;
+    padding: 1rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.booking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+    background: #FFFAF5;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.cancel-booking-button {
+    background: #201209;
+    color: #FAF3EB;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cancel-booking-button:hover {
+    background: #548B74;
+}
+
+.student-two-column-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: flex-start;
+    margin-top: 2rem;
+}
+
+.tutors-column {
+    background: #FFFAF5;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.bookings-column {
+    background: #FFFAF5;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.tutor-card {
+    padding: 1.5rem;
+    background: #FAF3EB;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tutor-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.tutor-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.tutor-price {
+    font-weight: 600;
+    color: #548B74;
+}
+
+.booking-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: #FAF3EB;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.booking-main-info {
+    flex: 1;
+    margin-right: 1rem;
+}
+
+.booking-datetime {
+    font-weight: 500;
+    color: #548B74;
+    min-width: 120px;
+    text-align: right;
+    margin: 0 1rem;
+}
+
+.booking-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: transparent;
+    padding: 0;
+    width: auto;
+}
+
+.modal-content {
+    background: #FFFAF5;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 280px;
+}
+
+.modal-content h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    color: #201209;
+    text-align: center;
+    font-weight: 600;
+}
+
+.custom-calendar {
+    width: 100%;
+    margin: 0 auto 1rem;
+}
+
+.react-calendar {
+    width: 100%;
+    border: none;
+    background: #FAF3EB;
+    border-radius: 8px;
+    padding: 0.75rem;
+    font-family: inherit;
+}
+
+.react-calendar__navigation {
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.react-calendar__navigation button {
+    min-width: 30px;
+    font-size: 0.9rem;
+    padding: 0.4em;
+    background: none;
+    border: none;
+    color: #201209;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.react-calendar__navigation button:enabled:hover {
+    background: #F9DABD;
+}
+
+.react-calendar__navigation__label {
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.react-calendar__month-view__weekdays {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    color: #548B74;
+    font-weight: 600;
+}
+
+.react-calendar__month-view__weekdays__weekday {
+    padding: 0.5em;
+    text-align: center;
+}
+
+.react-calendar__month-view__days__day {
+    padding: 0.6em;
+    font-size: 0.85rem;
+    color: #201209;
+}
+
+.react-calendar__month-view__days__day--weekend {
+    color: #467a63;
+}
+
+.react-calendar__tile--now {
+    background: #F9DABD;
+    color: #201209;
+    font-weight: bold;
+}
+
+.react-calendar__tile--active {
+    background: #548B74;
+    color: #FAF3EB;
+}
+
+.react-calendar__tile--active:enabled:hover {
+    background: #467a63;
+}
+
+.time-selection {
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.time-selection label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    color: #201209;
+}
+
+.time-input {
+    width: 100%;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    text-align: center;
+    background: #FAF3EB;
+    margin-bottom: 1rem;
+}
+
+.confirm-button-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.confirm-button {
+    background: #548B74;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+    width: 100%;
+}
+
+.confirm-button:hover {
+    background: #467a63;
+}
+
+.confirm-button:disabled {
+    background: #cccccc;
+    cursor: not-allowed;
+}
+
+.close-modal {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: none;
+    color: #6D6D6D;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+}
+
+@media (max-width: 768px) {
+    .student-two-column-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tutors-column,
+    .bookings-column {
+        max-height: none;
+    }
+}
+
 @keyframes slideIn {
     from { transform: translateX(100%); }
     to { transform: translateX(0); }
@@ -298,12 +895,9 @@
 
 .tutoring-container h2 {
     text-align: center;
-    /*margin-top: 1.5rem; !* Отступ сверху *!*/
 }
 
 .teacher-calendar h3 {
     text-align: center;
-    margin-bottom: 20px;
-
-    /*margin-top: 1.5rem; !* Отступ сверху *!*/
+    margin-bottom: 10px;
 }
