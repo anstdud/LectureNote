@@ -105,6 +105,8 @@ CREATE TABLE bookings (
   
 4. **Запуск приложения**
    ```bash
+   # Запуск клиента
+   npm start
    # Запуск сервера
    node server.js
    ```
