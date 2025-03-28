@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -32,78 +32,89 @@ const TutoringPage = ({ userRole }) => {
         return date.getDate().toString();
     };
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const token = localStorage.getItem('token');
-            try {
-                if (userRole === 'student') {
-                    const [tutorsResponse, bookingsResponse] = await Promise.all([
-                        fetch('http://localhost:5001/api/tutors', {
-                            headers: { 'Authorization': `Bearer ${token}` },
-                        }),
-                        fetch('http://localhost:5001/api/student/bookings', {
-                            headers: { 'Authorization': `Bearer ${token}` },
-                        }).catch(err => {
-                            console.error('Network error:', err);
-                            return { ok: false, status: 500 };
-                        })
-                    ]);
+    const showCustomAlert = (message, isError = false) => {
+        const alert = document.createElement('div');
+        alert.className = `custom-alert ${isError ? 'error' : 'success'}`;
+        alert.innerHTML = `
+            <span class="alert-icon">${isError ? '⚠️' : '✅'}</span>
+            ${message}
+        `;
+        document.body.appendChild(alert);
+        setTimeout(() => alert.remove(), 3000);
+    };
 
-                    if (!tutorsResponse.ok) {
-                        throw new Error('Ошибка при загрузке анкет преподавателей');
-                    }
+    const fetchData = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
-                    const tutorsData = await tutorsResponse.json();
-                    setTutors(tutorsData);
+        try {
+            if (userRole === 'student') {
+                const [tutorsResponse, bookingsResponse] = await Promise.all([
+                    fetch(`http://localhost:5001/api/tutors?t=${Date.now()}`, {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    }),
+                    fetch(`http://localhost:5001/api/student/bookings?t=${Date.now()}`, {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    })
+                ]);
 
-                    if (bookingsResponse.ok) {
-                        const bookingsData = await bookingsResponse.json();
-                        console.log('Полученные бронирования студента:', bookingsData);
-                        setStudentBookings(bookingsData);
-                    } else {
-                        console.error('Ошибка загрузки бронирований:', bookingsResponse.status, bookingsResponse.statusText);
-                        showCustomAlert('Ошибка при загрузке ваших занятий', true);
-                        setStudentBookings([]);
-                    }
-                } else {
-                    const [tutoringResponse, tutorProfile] = await Promise.all([
-                        fetch('http://localhost:5001/api/tutoring', {  // Изменено с /api/bookings на /api/tutoring
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        }),
-                        fetch('http://localhost:5001/api/tutor', {
-                            headers: { 'Authorization': `Bearer ${token}` }
-                        })
-                    ]);
-
-                    if (tutoringResponse.ok) {
-                        const bookingsData = await tutoringResponse.json();
-                        console.log('Полученные бронирования преподавателя:', bookingsData);
-                        setBookings(bookingsData);
-                    } else {
-                        console.error('Ошибка загрузки бронирований преподавателя:', tutoringResponse.status);
-                    }
-
-                    if (tutorProfile.ok) {
-                        const tutorData = await tutorProfile.json();
-                        setIsProfileCreated(!!tutorData.subject);
-                        setSubject(tutorData.subject || '');
-                        setPrice(tutorData.price || '');
-                        setFullName(tutorData.fullName || '');
-                        setAvailableDays(tutorData.availableDays || []);
-                        setAvailableTime(tutorData.availableTime || {
-                            start: '09:00',
-                            end: '18:00'
-                        });
-                    }
+                if (!tutorsResponse.ok) {
+                    throw new Error('Ошибка при загрузке анкет преподавателей');
                 }
-            } catch (error) {
-                console.error('Ошибка:', error);
-                showCustomAlert('Ошибка при загрузке данных', true);
-                setStudentBookings([]);
+
+                const tutorsData = await tutorsResponse.json();
+                setTutors(tutorsData);
+
+                if (bookingsResponse.ok) {
+                    const bookingsData = await bookingsResponse.json();
+                    setStudentBookings(bookingsData);
+                } else {
+                    setStudentBookings([]);
+                }
+            } else {
+                const [tutoringResponse, tutorProfile] = await Promise.all([
+                    fetch(`http://localhost:5001/api/tutoring?t=${Date.now()}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`http://localhost:5001/api/tutor?t=${Date.now()}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                if (tutoringResponse.ok) {
+                    const bookingsData = await tutoringResponse.json();
+                    setBookings(bookingsData);
+                }
+
+                if (tutorProfile.ok) {
+                    const tutorData = await tutorProfile.json();
+                    setIsProfileCreated(!!tutorData.subject);
+                    setSubject(tutorData.subject || '');
+                    setPrice(tutorData.price || '');
+                    setFullName(tutorData.fullName || '');
+                    setAvailableDays(tutorData.availableDays || []);
+                    setAvailableTime(tutorData.availableTime || {
+                        start: '09:00',
+                        end: '18:00'
+                    });
+                }
             }
-        };
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showCustomAlert('Ошибка при загрузке данных', true);
+        }
+    }, [userRole, navigate]);
+
+    useEffect(() => {
         fetchData();
-    }, [userRole, navigate])
+
+        // Автообновление каждые 30 секунд
+        const interval = setInterval(fetchData, 30000);
+        return () => clearInterval(interval);
+    }, [fetchData]);
 
     const isDayBooked = (date) => {
         return bookings.some(booking => {
@@ -147,6 +158,7 @@ const TutoringPage = ({ userRole }) => {
             setIsProfileCreated(true);
             setIsEditing(false);
             showCustomAlert(`Анкета успешно ${isProfileCreated ? 'обновлена' : 'создана'}!`);
+            await fetchData();
         } catch (error) {
             console.error('Ошибка:', error);
             showCustomAlert(error.message || 'Ошибка операции', true);
@@ -172,6 +184,7 @@ const TutoringPage = ({ userRole }) => {
             setAvailableDays([]);
             setAvailableTime({ start: '09:00', end: '18:00' });
             showCustomAlert('Анкета успешно удалена!');
+            await fetchData();
         } catch (error) {
             console.error('Ошибка:', error);
             showCustomAlert('Ошибка при удалении анкеты', true);
@@ -211,21 +224,7 @@ const TutoringPage = ({ userRole }) => {
             }
 
             showCustomAlert('Занятие успешно запланировано!');
-
-            try {
-                const bookingsResponse = await fetch('http://localhost:5001/api/student/bookings', {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
-                if (bookingsResponse.ok) {
-                    const bookingsData = await bookingsResponse.json();
-                    setStudentBookings(bookingsData);
-                } else {
-                    console.error('Ошибка обновления списка бронирований:', bookingsResponse.status);
-                }
-            } catch (error) {
-                console.error('Ошибка при обновлении списка бронирований:', error);
-            }
-
+            await fetchData();
             setSelectedTutor(null);
         } catch (error) {
             console.error('Ошибка:', error);
@@ -256,17 +255,6 @@ const TutoringPage = ({ userRole }) => {
         }
     };
 
-    const showCustomAlert = (message, isError = false) => {
-        const alert = document.createElement('div');
-        alert.className = `custom-alert ${isError ? 'error' : 'success'}`;
-        alert.innerHTML = `
-            <span class="alert-icon">${isError ? '⚠️' : '✅'}</span>
-            ${message}
-        `;
-        document.body.appendChild(alert);
-        setTimeout(() => alert.remove(), 3000);
-    };
-
     const handleCancelBooking = async (bookingId) => {
         try {
             const token = localStorage.getItem('token');
@@ -277,15 +265,8 @@ const TutoringPage = ({ userRole }) => {
 
             if (!response.ok) throw new Error('Ошибка при отмене занятия');
 
-            if (userRole === 'student') {
-                const updatedBookings = studentBookings.filter(booking => booking.id !== bookingId);
-                setStudentBookings(updatedBookings);
-            } else {
-                const updatedBookings = bookings.filter(booking => booking.id !== bookingId);
-                setBookings(updatedBookings);
-            }
-
             showCustomAlert('Занятие успешно отменено!');
+            await fetchData();
         } catch (error) {
             console.error('Ошибка:', error);
             showCustomAlert('Ошибка при отмене занятия', true);
