@@ -16,6 +16,8 @@ app.use(express.json());
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 const pool = new Pool({
@@ -94,7 +96,7 @@ app.post('/api/login', [
             id: user.id,
             username: user.username,
             role: user.role
-        }, JWT_SECRET, { expiresIn: '1h' });
+        }, JWT_SECRET, { expiresIn: '4h' });
 
         res.json({
             token,
@@ -104,6 +106,15 @@ app.post('/api/login', [
         console.error('Ошибка при входе:', err);
         res.status(500).json({ error: 'Ошибка сервера' });
     }
+});
+
+app.post('/api/refresh-token', authenticate, async (req, res) => {
+    const newToken = jwt.sign(
+        { id: req.user.id, username: req.user.username, role: req.user.role },
+        JWT_SECRET,
+        { expiresIn: '4h' }
+    );
+    res.json({ token: newToken });
 });
 
 app.get('/api/tutoring', authenticate, async (req, res) => {
@@ -145,7 +156,6 @@ app.post('/api/tutoring', authenticate, [
         return res.status(400).json({ errors: errors.array() });
     }
 
-    // Проверка роли
     if (req.user.role !== 'student') {
         return res.status(403).json({ error: 'Только студенты могут записываться на занятия' });
     }
@@ -153,7 +163,6 @@ app.post('/api/tutoring', authenticate, [
     try {
         const { tutorId, datetime } = req.body;
 
-        // Проверка существования преподавателя
         const tutorExists = await pool.query(
             'SELECT id FROM tutors WHERE user_id = $1',
             [tutorId]
