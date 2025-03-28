@@ -901,3 +901,53 @@
     text-align: center;
     margin-bottom: 10px;
 }
+
+.loading-overlay {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #3498db;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.error-container {
+    text-align: center;
+    padding: 2rem;
+    background-color: #ffecec;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.error-message {
+    color: #d32f2f;
+    margin-bottom: 1rem;
+}
+
+.retry-button {
+    padding: 8px 16px;
+    background-color: #548B74;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.retry-button:hover {
+    background-color: #201209;
+}

@@ -19,6 +19,9 @@ const TutoringPage = ({ userRole }) => {
     const [availableDays, setAvailableDays] = useState([]);
     const [availableTime, setAvailableTime] = useState({ start: '09:00', end: '18:00' });
     const navigate = useNavigate();
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
 
     const daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const daysOrder = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -50,6 +53,9 @@ const TutoringPage = ({ userRole }) => {
             return;
         }
 
+        setIsLoading(true);
+        setError(null);
+
         try {
             if (userRole === 'student') {
                 const [tutorsResponse, bookingsResponse] = await Promise.all([
@@ -61,62 +67,59 @@ const TutoringPage = ({ userRole }) => {
                     })
                 ]);
 
-                if (!tutorsResponse.ok) {
-                    throw new Error('Ошибка при загрузке анкет преподавателей');
-                }
+                if (!tutorsResponse.ok) throw new Error('Ошибка при загрузке анкет преподавателей');
+                if (!bookingsResponse.ok) throw new Error('Ошибка при загрузке бронирований');
 
-                const tutorsData = await tutorsResponse.json();
-                setTutors(tutorsData);
-
-                if (bookingsResponse.ok) {
-                    const bookingsData = await bookingsResponse.json();
-                    setStudentBookings(bookingsData);
-                } else {
-                    setStudentBookings([]);
-                }
-            } else {
-                const [tutoringResponse, tutorProfile] = await Promise.all([
-                    fetch(`http://localhost:5001/api/tutoring?t=${Date.now()}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }),
-                    fetch(`http://localhost:5001/api/tutor?t=${Date.now()}`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    })
+                const [tutorsData, bookingsData] = await Promise.all([
+                    tutorsResponse.json(),
+                    bookingsResponse.json()
                 ]);
 
-                if (tutoringResponse.ok) {
-                    const bookingsData = await tutoringResponse.json();
-                    setBookings(bookingsData);
-                }
+                setTutors(tutorsData);
+                setStudentBookings(bookingsData);
+            } else {
+                const response = await fetch(`http://localhost:5001/api/tutoring?t=${Date.now()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
 
-                if (tutorProfile.ok) {
-                    const tutorData = await tutorProfile.json();
-                    setIsProfileCreated(!!tutorData.subject);
-                    setSubject(tutorData.subject || '');
-                    setPrice(tutorData.price || '');
-                    setFullName(tutorData.fullName || '');
-                    setAvailableDays(tutorData.availableDays || []);
-                    setAvailableTime(tutorData.availableTime || {
-                        start: '09:00',
-                        end: '18:00'
-                    });
+                if (!response.ok) throw new Error('Ошибка при загрузке данных');
+
+                const data = await response.json();
+
+                setBookings(data.bookings || []);
+
+                if (isInitialLoad) {
+                    if (data.tutorData) {
+                        setIsProfileCreated(!!data.tutorData.subject);
+                        setSubject(data.tutorData.subject || '');
+                        setPrice(data.tutorData.price || '');
+                        setFullName(data.tutorData.fullName || '');
+                        setAvailableDays(data.tutorData.availableDays || []);
+                        setAvailableTime(data.tutorData.availableTime || {
+                            start: '09:00',
+                            end: '18:00'
+                        });
+                    }
+                    setIsInitialLoad(false);
                 }
             }
         } catch (error) {
             console.error('Ошибка:', error);
-            showCustomAlert('Ошибка при загрузке данных', true);
+            setError('Ошибка при загрузке данных');
+        } finally {
+            setIsLoading(false);
         }
-    }, [userRole, navigate]);
+    }, [userRole, navigate, isInitialLoad]);
 
     useEffect(() => {
         fetchData();
 
-        // Автообновление каждые 30 секунд
         const interval = setInterval(fetchData, 30000);
         return () => clearInterval(interval);
     }, [fetchData]);
 
     const isDayBooked = (date) => {
+        if (!bookings || !Array.isArray(bookings)) return false;
         return bookings.some(booking => {
             const bookingDate = new Date(booking.datetime);
             return bookingDate.toDateString() === date.toDateString();
@@ -285,6 +288,35 @@ const TutoringPage = ({ userRole }) => {
     const sortedAvailableDays = (days) => {
         return daysOrder.filter(day => days.includes(day));
     };
+
+    if (isLoading) {
+        return (
+            <div className="tutoring-container">
+                <h2>Репетиторство</h2>
+                <div className="loading-overlay">
+                    <div className="spinner"></div>
+                    <p>Загрузка данных...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="tutoring-container">
+                <h2>Репетиторство</h2>
+                <div className="error-container">
+                    <p className="error-message">{error}</p>
+                    <button
+                        className="retry-button"
+                        onClick={fetchData}
+                    >
+                        Повторить попытку
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="tutoring-container">

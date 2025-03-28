@@ -108,38 +108,56 @@ app.post('/api/login', [
     }
 });
 
-app.post('/api/refresh-token', authenticate, async (req, res) => {
-    const newToken = jwt.sign(
-        { id: req.user.id, username: req.user.username, role: req.user.role },
-        JWT_SECRET,
-        { expiresIn: '4h' }
-    );
-    res.json({ token: newToken });
+app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+    next();
 });
 
 app.get('/api/tutoring', authenticate, async (req, res) => {
     try {
         if (req.user.role === 'student') {
             const result = await pool.query(`
-                SELECT u.id, u.username, t.subject, t.price 
+                SELECT 
+                    u.id, 
+                    t.full_name AS "fullName", 
+                    t.subject, 
+                    t.price,
+                    t.available_days AS "availableDays",
+                    t.available_time AS "availableTime"
                 FROM tutors t
                 JOIN users u ON t.user_id = u.id
             `);
             res.json(result.rows);
         } else if (req.user.role === 'teacher') {
-            const result = await pool.query(`
-                SELECT 
-                    b.id, 
-                    u.username, 
-                    b.datetime,
-                    t.subject
-                FROM bookings b
-                JOIN users u ON b.student_id = u.id
-                JOIN tutors t ON b.tutor_id = t.user_id
-                WHERE b.tutor_id = $1
-                ORDER BY b.datetime DESC
-            `, [req.user.id]);
-            res.json(result.rows);
+            const [bookings, tutorData] = await Promise.all([
+                pool.query(`
+                    SELECT 
+                        b.id, 
+                        u.username, 
+                        b.datetime,
+                        t.subject
+                    FROM bookings b
+                    JOIN users u ON b.student_id = u.id
+                    JOIN tutors t ON b.tutor_id = t.user_id
+                    WHERE b.tutor_id = $1
+                    ORDER BY b.datetime DESC
+                `, [req.user.id]),
+                pool.query(`
+                    SELECT 
+                        full_name AS "fullName",
+                        subject,
+                        price,
+                        available_days AS "availableDays",
+                        available_time AS "availableTime"
+                    FROM tutors 
+                    WHERE user_id = $1
+                `, [req.user.id])
+            ]);
+
+            res.json({
+                bookings: bookings.rows,
+                tutorData: tutorData.rows[0] || null
+            });
         }
     } catch (err) {
         console.error('Ошибка:', err);
@@ -333,7 +351,7 @@ app.get('/api/student/bookings', authenticate, async (req, res) => {
              FROM bookings b
              JOIN tutors t ON b.tutor_id = t.user_id
              WHERE b.student_id = $1
-             ORDER BY b.datetime DESC`,
+             ORDER BY b.datetime ASC`,  // Изменим сортировку на ASC для хронологического порядка
             [req.user.id]
         );
         res.json(result.rows);
