@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { showCustomAlert } from '../Notifications/Notifications.js';
 import './AuthModal.css';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
     const [username, setUsername] = useState('');
@@ -9,6 +10,8 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
     const [role, setRole] = useState('student');
     const [isRegister, setIsRegister] = useState(false);
     const [error, setError] = useState('');
+    const location = useLocation();
+    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -24,17 +27,21 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
                 throw new Error(errorData.error || 'Ошибка при входе');
             }
 
-            const { token, role } = await response.json();
+            const { token, role, username: responseUsername } = await response.json();
+
             localStorage.setItem('token', token);
-            localStorage.setItem('username', username);
+            localStorage.setItem('username', responseUsername);
             localStorage.setItem('role', role);
+
             setIsAuthenticated(true);
             setUserRole(role);
-            showCustomAlert('Вход выполнен успешно!');
+
+            const from = location.state?.from?.pathname || '/';
+            navigate(from, { replace: true });
 
         } catch (err) {
-            console.error('Ошибка соединения с сервером:', err);
-            showCustomAlert(err.message || 'Ошибка соединения с сервером', true);
+            console.error('Ошибка:', err);
+            setError(err.message);
         }
     };
 
