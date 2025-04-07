@@ -21,7 +21,7 @@ const TutoringPage = ({ userRole }) => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [additionalInfo, setAdditionalInfo] = useState('');
 
     const daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const daysOrder = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
@@ -88,19 +88,26 @@ const TutoringPage = ({ userRole }) => {
 
                 setBookings(data.bookings || []);
 
-                if (isInitialLoad) {
-                    if (data.tutorData) {
-                        setIsProfileCreated(!!data.tutorData.subject);
-                        setSubject(data.tutorData.subject || '');
-                        setPrice(data.tutorData.price || '');
-                        setFullName(data.tutorData.fullName || '');
-                        setAvailableDays(data.tutorData.availableDays || []);
-                        setAvailableTime(data.tutorData.availableTime || {
-                            start: '09:00',
-                            end: '18:00'
-                        });
-                    }
-                    setIsInitialLoad(false);
+                if (data.tutorData) {
+                    setIsProfileCreated(true);
+                    setSubject(data.tutorData.subject || '');
+                    setPrice(data.tutorData.price || '');
+                    setFullName(data.tutorData.fullName || '');
+                    setAdditionalInfo(data.tutorData.additionalInfo ?? '');
+                    setAvailableDays(data.tutorData.availableDays || []);
+                    setAvailableTime(data.tutorData.availableTime || {
+                        start: '09:00',
+                        end: '18:00'
+                    });
+                } else {
+                    console.log('Профиль преподавателя не найден');
+                    setIsProfileCreated(false);
+                    setSubject('');
+                    setPrice('');
+                    setFullName('');
+                    setAdditionalInfo('');
+                    setAvailableDays([]);
+                    setAvailableTime({ start: '09:00', end: '18:00' });
                 }
             }
         } catch (error) {
@@ -109,7 +116,7 @@ const TutoringPage = ({ userRole }) => {
         } finally {
             setIsLoading(false);
         }
-    }, [userRole, navigate, isInitialLoad]);
+    }, [userRole, navigate]);
 
     useEffect(() => {
         fetchData();
@@ -133,19 +140,19 @@ const TutoringPage = ({ userRole }) => {
                 throw new Error('Токен отсутствует');
             }
 
-            const method = 'POST';
-            const url = 'http://localhost:5001/api/tutor';
-
             const bodyData = {
                 fullName,
                 subject,
                 price: Number(price),
                 availableDays,
-                availableTime
+                availableTime,
+                additionalInfo: additionalInfo || ''
             };
 
-            const response = await fetch(url, {
-                method,
+            console.log('Отправляемые данные:', bodyData);
+
+            const response = await fetch('http://localhost:5001/api/tutor', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
@@ -158,10 +165,19 @@ const TutoringPage = ({ userRole }) => {
                 throw new Error(errorText || 'Ошибка сервера');
             }
 
+            const updatedProfile = await response.json();
+            console.log('Обновленный профиль с сервера:', updatedProfile);
+
             setIsProfileCreated(true);
             setIsEditing(false);
-            showCustomAlert(`Анкета успешно ${isProfileCreated ? 'обновлена' : 'создана'}!`);
-            await fetchData();
+            setSubject(updatedProfile.subject || '');
+            setPrice(updatedProfile.price || '');
+            setFullName(updatedProfile.fullName || '');
+            setAdditionalInfo(updatedProfile.additionalInfo || '');
+            setAvailableDays(updatedProfile.availableDays || []);
+            setAvailableTime(updatedProfile.availableTime || { start: '09:00', end: '18:00' });
+
+            showCustomAlert('Анкета успешно сохранена!');
         } catch (error) {
             console.error('Ошибка:', error);
             showCustomAlert(error.message || 'Ошибка операции', true);
@@ -184,6 +200,7 @@ const TutoringPage = ({ userRole }) => {
             setSubject('');
             setPrice('');
             setFullName('');
+            setAdditionalInfo('');
             setAvailableDays([]);
             setAvailableTime({ start: '09:00', end: '18:00' });
             showCustomAlert('Анкета успешно удалена!');
@@ -321,7 +338,6 @@ const TutoringPage = ({ userRole }) => {
     return (
         <div className="tutoring-container">
             <h2>Репетиторство</h2>
-
             {userRole === 'student' ? (
                 <div className="student-two-column-layout">
                     <div className="tutors-column">
@@ -336,11 +352,17 @@ const TutoringPage = ({ userRole }) => {
                                     <div className="tutor-card-body">
                                         <p className="tutor-subject"><strong>Предмет:</strong> {tutor.subject}</p>
                                         <p className="tutor-availability">
-                                            <strong>Доступные дни:</strong> {sortedAvailableDays(tutor.availableDays).join(', ')}
+                                            <strong>Доступные
+                                                дни:</strong> {sortedAvailableDays(tutor.availableDays).join(', ')}
                                         </p>
                                         <p className="tutor-time">
                                             <strong>Время:</strong> {tutor.availableTime.start} - {tutor.availableTime.end}
                                         </p>
+                                        {tutor.additionalInfo && (
+                                            <div className="tutor-additional-info">
+                                                <strong>Дополнительно:</strong> {tutor.additionalInfo}
+                                            </div>
+                                        )}
                                     </div>
                                     <button
                                         className="schedule-button"
@@ -356,12 +378,6 @@ const TutoringPage = ({ userRole }) => {
                             <div className="booking-modal">
                                 <div className="modal-content">
                                     <h3>Запланировать занятие с {selectedTutor.fullName}</h3>
-                                    <button
-                                        className="close-modal"
-                                        onClick={() => setSelectedTutor(null)}
-                                    >
-                                        &times;
-                                    </button>
 
                                     <div className="calendar-section">
                                         <Calendar
@@ -369,7 +385,7 @@ const TutoringPage = ({ userRole }) => {
                                             onChange={setCalendarDate}
                                             value={calendarDate}
                                             className="custom-calendar"
-                                            tileDisabled={({ date }) => !isDayAvailable(date)}
+                                            tileDisabled={({date}) => !isDayAvailable(date)}
                                             formatShortWeekday={formatShortWeekday}
                                             formatDay={formatDay}
                                             locale="ru-RU"
@@ -396,6 +412,12 @@ const TutoringPage = ({ userRole }) => {
                                     </div>
 
                                     <div className="modal-actions">
+                                        <button
+                                            className="close-modal-button"
+                                            onClick={() => setSelectedTutor(null)}
+                                        >
+                                            Закрыть
+                                        </button>
                                         <button
                                             className="confirm-button"
                                             onClick={() => handleBooking(selectedTutor.id)}
@@ -485,6 +507,13 @@ const TutoringPage = ({ userRole }) => {
                                     </div>
                                 </div>
 
+                                {additionalInfo && additionalInfo.trim() !== '' && (
+                                    <div className="additional-info-section">
+                                        <h4>Дополнительная информация</h4>
+                                        <p className="additional-info-content">{additionalInfo}</p>
+                                    </div>
+                                )}
+
                                 <div className="availability-section">
                                     <h4>Доступные дни</h4>
                                     <div className="available-days-display">
@@ -512,60 +541,119 @@ const TutoringPage = ({ userRole }) => {
                             </div>
                         ) : (
                             <>
-                                <h3>Мой профиль преподавателя</h3>
-                                <input
-                                    type="text"
-                                    placeholder="ФИО"
-                                    value={fullName}
-                                    onChange={e => setFullName(e.target.value)}
-                                />
-                                <input
-                                    type="text"
-                                    placeholder="Предмет"
-                                    value={subject}
-                                    onChange={e => setSubject(e.target.value)}
-                                />
-                                <input
-                                    type="number"
-                                    placeholder="Цена за час"
-                                    value={price}
-                                    onChange={e => setPrice(e.target.value)}
-                                />
-                                <div className="available-days-container">
-                                    <label>Доступные дни:</label>
-                                    {daysOrder.map(day => (
-                                        <label key={day}>
-                                            <input
-                                                type="checkbox"
-                                                checked={availableDays.includes(day)}
-                                                onChange={e => {
-                                                    if (e.target.checked) {
-                                                        setAvailableDays([...availableDays, day]);
-                                                    } else {
-                                                        setAvailableDays(availableDays.filter(d => d !== day));
-                                                    }
-                                                }}
-                                            />
-                                            {day}
-                                        </label>
-                                    ))}
+                                <div className="edit-profile-form">
+                                    <div className="edit-profile-header">
+                                        <h3>{isProfileCreated ? 'Редактирование профиля' : 'Создание профиля преподавателя'}</h3>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>ФИО</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Иванов Иван Иванович"
+                                            value={fullName}
+                                            onChange={(e) => setFullName(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Предмет</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Математика, Физика и т.д."
+                                            value={subject}
+                                            onChange={(e) => setSubject(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Цена за час (руб.)</label>
+                                        <input
+                                            type="number"
+                                            placeholder="Например: 1500"
+                                            value={price}
+                                            onChange={(e) => setPrice(e.target.value)}
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Дополнительная информация</label>
+                                        <textarea
+                                            value={additionalInfo}
+                                            onChange={(e) => setAdditionalInfo(e.target.value)}
+                                            placeholder="Опыт работы, методика преподавания, образование..."
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Доступные дни</label>
+                                        <div className="days-checkbox-grid">
+                                            {daysOrder.map((day) => (
+                                                <div key={day} className="day-checkbox-item">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`day-${day}`}
+                                                        checked={availableDays.includes(day)}
+                                                        onChange={(e) => {
+                                                            if (e.target.checked) {
+                                                                setAvailableDays([...availableDays, day]);
+                                                            } else {
+                                                                setAvailableDays(availableDays.filter((d) => d !== day));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <label htmlFor={`day-${day}`}>{day}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Время занятий</label>
+                                        <div className="time-range-container">
+                                            <div className="time-input-group">
+                                                <label htmlFor="start-time">С</label>
+                                                <input
+                                                    id="start-time"
+                                                    type="time"
+                                                    value={availableTime.start}
+                                                    onChange={(e) => setAvailableTime({
+                                                        ...availableTime,
+                                                        start: e.target.value
+                                                    })}
+                                                />
+                                            </div>
+                                            <div className="time-input-group">
+                                                <label htmlFor="end-time">До</label>
+                                                <input
+                                                    id="end-time"
+                                                    type="time"
+                                                    value={availableTime.end}
+                                                    onChange={(e) => setAvailableTime({
+                                                        ...availableTime,
+                                                        end: e.target.value
+                                                    })}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="form-actions">
+                                        <button
+                                            className="close-form-button"
+                                            onClick={() => setIsEditing(false)}
+                                            type="button"
+                                        >
+                                            Закрыть
+                                        </button>
+                                        <button
+                                            className="submit-button"
+                                            onClick={handleProfileSubmit}
+                                        >
+                                            {isProfileCreated ? 'Сохранить изменения' : 'Создать анкету'}
+                                        </button>
+                                    </div>
                                 </div>
-                                <div>
-                                    <label>Время занятий:</label>
-                                    <input
-                                        type="time"
-                                        value={availableTime.start}
-                                        onChange={e => setAvailableTime({...availableTime, start: e.target.value})}
-                                    />
-                                    <input
-                                        type="time"
-                                        value={availableTime.end}
-                                        onChange={e => setAvailableTime({...availableTime, end: e.target.value})}
-                                    />
-                                </div>
-                                <button className="submit-button" onClick={handleProfileSubmit}>
-                                    {isProfileCreated ? 'Обновить данные' : 'Создать анкету'}
-                                </button>
                             </>
                         )}
                     </div>
@@ -588,7 +676,7 @@ const TutoringPage = ({ userRole }) => {
                                     onChange={setCalendarDate}
                                     value={calendarDate}
                                     className="custom-calendar"
-                                    tileContent={({ date, view }) =>
+                                    tileContent={({date, view}) =>
                                         view === 'month' && isDayBooked(date) && (
                                             <div className="booking-marker"/>
                                         )
@@ -612,7 +700,8 @@ const TutoringPage = ({ userRole }) => {
                                                             <strong>Студент:</strong> {booking.username}
                                                         </p>
                                                         <p className="booking-time">
-                                                            <strong>Дата и время:</strong> {new Date(booking.datetime).toLocaleString('ru-RU', {
+                                                            <strong>Дата и
+                                                                время:</strong> {new Date(booking.datetime).toLocaleString('ru-RU', {
                                                             day: 'numeric',
                                                             month: 'numeric',
                                                             year: 'numeric',

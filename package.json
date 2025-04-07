@@ -34,7 +34,8 @@
     "react-textarea-autosize": "^8.5.7",
     "simplebar-react": "^3.3.0",
     "uuid": "^11.0.5",
-    "web-vitals": "^2.1.4"
+    "web-vitals": "^2.1.4",
+    "ws": "^8.18.1"
   },
   "scripts": {
     "start": "PORT=3000 react-scripts start",

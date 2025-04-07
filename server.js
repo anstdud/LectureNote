@@ -148,7 +148,8 @@ app.get('/api/tutoring', authenticate, async (req, res) => {
                         subject,
                         price,
                         available_days AS "availableDays",
-                        available_time AS "availableTime"
+                        available_time AS "availableTime",
+                        COALESCE(additional_info, '') AS "additionalInfo"
                     FROM tutors 
                     WHERE user_id = $1
                 `, [req.user.id])
@@ -217,20 +218,10 @@ app.post('/api/tutor', authenticate, [
     body('price').isNumeric(),
     body('availableDays').isArray(),
     body('availableTime').isObject(),
+    body('additionalInfo').optional().trim().escape()
 ], async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        console.log('Validation errors:', errors.array());
-        return res.status(400).json({ errors: errors.array() });
-    }
-
-    console.log('User role:', req.user.role);
-    if (req.user.role !== 'teacher') {
-        return res.status(403).json({ error: 'Доступ запрещен' });
-    }
-
-    const { fullName, subject, price, availableDays, availableTime } = req.body;
-    console.log('Received data:', { fullName, subject, price, availableDays, availableTime }); // Логируем полученные данные
+    console.log('Received tutor data:', req.body);
+    const { fullName, subject, price, availableDays, availableTime, additionalInfo = '' } = req.body; // Устанавливаем значение по умолчанию
 
     try {
         const existing = await pool.query(
@@ -241,22 +232,39 @@ app.post('/api/tutor', authenticate, [
         if (existing.rows.length > 0) {
             await pool.query(
                 `UPDATE tutors 
-                 SET full_name = $1, subject = $2, price = $3, available_days = $4, available_time = $5
-                 WHERE user_id = $6`,
-                [fullName, subject, price, availableDays, availableTime, req.user.id]
+                 SET full_name = $1, 
+                     subject = $2, 
+                     price = $3, 
+                     available_days = $4, 
+                     available_time = $5,
+                     additional_info = $6
+                 WHERE user_id = $7`,
+                [fullName, subject, price, availableDays, availableTime, additionalInfo, req.user.id]
             );
         } else {
             await pool.query(
-                `INSERT INTO tutors (user_id, full_name, subject, price, available_days, available_time)
-                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                [req.user.id, fullName, subject, price, availableDays, availableTime]
+                `INSERT INTO tutors (user_id, full_name, subject, price, available_days, available_time, additional_info)
+                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                [req.user.id, fullName, subject, price, availableDays, availableTime, additionalInfo]
             );
         }
 
-        res.json({ message: 'Профиль сохранен' });
+        const result = await pool.query(`
+            SELECT 
+                full_name AS "fullName",
+                subject,
+                price,
+                available_days AS "availableDays",
+                available_time AS "availableTime",
+                additional_info AS "additionalInfo"
+            FROM tutors 
+            WHERE user_id = $1
+        `, [req.user.id]);
+
+        res.json(result.rows[0] || {});
     } catch (err) {
-        console.error('Ошибка в /api/tutor:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
     }
 });
 
@@ -272,7 +280,8 @@ app.get('/api/tutor', authenticate, async (req, res) => {
                 subject,
                 price,
                 available_days AS "availableDays",
-                available_time AS "availableTime"
+                available_time AS "availableTime",
+                COALESCE(additional_info, '') AS "additionalInfo"  -- Явно обрабатываем NULL
             FROM tutors 
             WHERE user_id = $1
         `, [req.user.id]);
@@ -294,7 +303,8 @@ app.get('/api/tutors', authenticate, async (req, res) => {
                 t.subject,
                 t.price,
                 t.available_days AS "availableDays",
-                t.available_time AS "availableTime"
+                t.available_time AS "availableTime",
+                t.additional_info AS "additionalInfo"
             FROM tutors t
             JOIN users u ON t.user_id = u.id
         `);
