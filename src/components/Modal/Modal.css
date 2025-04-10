@@ -1,55 +1,10 @@
 .lecture-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
     height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    z-index: 100;
-    opacity: 0;
-    transform: translateY(100%);
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    pointer-events: none;
-}
-
-.lecture-modal.open {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-
-.lecture-modal.closing {
-    opacity: 0;
-    transform: translateY(100%);
-}
-
-.lecture-modal-content {
-    position: relative;
-    display: flex;
-    flex-direction: column;
     width: 100%;
-    height: calc(100% - 75px);
-    padding: 20px;
-    border-radius: 8px 8px 0 0;
-    background-color: #FAF3EB;
-    box-sizing: border-box;
+    background: #FAF3EB;
+    position: relative;
     overflow: hidden;
-    transform: translateY(0);
-    transition: transform 0.3s ease;
-}
-
-.lectures-btn, .close-btn {
-    border: none;
-    border-bottom: 1px solid #201209;
-    cursor: pointer;
-}
-
-.close-btn {
-    width: 30px;
-    border: none;
-    background-color: unset;
+    padding-left: 20px; /* Добавляем боковые отступы */
 }
 
 .lectures-modal-text-container {
@@ -57,7 +12,31 @@
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
-    margin-bottom: 20px;
+    height: calc(100% - 80px); /* Учитываем высоту кнопок */
+}
+
+.lecture-modal-content {
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+.close-btn {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1;
+}
+
+.close-btn:hover {
+    background-color: rgba(0,0,0,0.1);
 }
 
 .lectures-modal-title {
@@ -65,7 +44,6 @@
     font-family: "TaylorSans", sans-serif;
     color: #201209;
     width: 100%;
-    padding: 10px;
     margin-bottom: 10px;
     border: none;
     border-bottom: 1px solid #201209;
@@ -75,9 +53,8 @@
 
 .lectures-modal-textarea {
     width: 100%;
-    max-height: calc(100% - 90px);
+    height: calc(100% - 50px);
     flex-grow: 1;
-    padding: 10px;
     outline: none;
     border: none;
     background: none;
@@ -90,7 +67,6 @@
     margin-bottom: 0;
 }
 
-/* Стилизация скроллбара */
 .lectures-modal-textarea::-webkit-scrollbar {
     width: 8px;
     background-color: #FAF3EB;
@@ -113,16 +89,23 @@
 
 .lectures-button-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    bottom: 30px;
-    width: calc(100% - 40px);
+    width: 100%;
+    height: 50px;
     box-sizing: border-box;
+    margin-top: 10px;
 }
 
-.lectures-savebtn, .lectures-editbtn, .lectures-exportbtn {
-    width: 130px;
+.view-mode-buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    gap: 20px;
+}
+
+.lectures-savebtn {
+    background-color: #548B74;
+    width: 100%;
+    max-width: 130px;
     height: 40px;
     padding: 10px 20px;
     color: #FAF3EB;
@@ -131,21 +114,39 @@
     cursor: pointer;
     font-size: 16px;
     font-family: "TaylorSans", sans-serif;
-    background-color: #548B74;
+    margin: 0 auto;
 }
 
 .lectures-exportbtn {
     background-color: #201209;
+    width: 100%;
+    max-width: 130px;
+    height: 40px;
+    padding: 10px 20px;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
 }
 
-.lectures-savebtn {
-    position: fixed;
-    left: 50%;
-    bottom: 30px;
-    transform: translateX(-50%);
+.lectures-editbtn {
+    background-color: #548B74;
+    width: 100%;
+    max-width: 130px;
+    height: 40px;
+    padding: 10px 20px;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 16px;
+    font-family: "TaylorSans", sans-serif;
 }
 
-.lectures-savebtn:hover, .lectures-editbtn:hover {
+.lectures-savebtn:hover,
+.lectures-editbtn:hover {
     background-color: rgba(85, 139, 116, 0.8);
 }
 

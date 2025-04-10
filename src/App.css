@@ -1,8 +1,14 @@
+.main-content-container {
+    display: flex;
+    height: calc(100vh - 60px); /* Учитываем высоту хедера */
+    overflow: hidden;
+}
 
-
-
-
-
-
-
-
+.editor-container {
+    flex: 2;
+    background: #FAF3EB;
+    border-left: 1px solid #201209;
+    position: relative;
+    height: 100%; /* Фиксируем высоту */
+    overflow: hidden;
+}

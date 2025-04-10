@@ -77,20 +77,20 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
     return (
         <div className="lectures-list">
             {!isSearching && (
-                <>
+                <div className="list-controls">
                     <button
-                        className="lecture-item lectures-btn-import"
+                        className="lectures-btn-import"
                         onClick={() => document.getElementById('fileInput').click()}
                     >
                         <span className="circle-icon">↑</span> Импорт из файла
                     </button>
                     <button
-                        className="lecture-item lectures-btn-create"
+                        className="lectures-btn-create"
                         onClick={() => openModal(null)}
                     >
                         <span className="circle-icon">+</span> Создать запись
                     </button>
-                </>
+                </div>
             )}
             <input
                 id="fileInput"

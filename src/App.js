@@ -8,6 +8,7 @@ import CodeModal from './components/CodeModal/CodeModal.js';
 import SuccessModal from './components/SuccessModal/SuccessModal.js';
 import ProfilePage from './components/ProfilePage/ProfilePage.js';
 import TutoringPage from './components/TutoringPage/TutoringPage.js';
+import './App.css';
 
 const ProtectedRoute = ({ children, isAuthenticated }) => {
   const location = useLocation();
@@ -134,7 +135,7 @@ const App = () => {
         headers: { 'Authorization': `Bearer ${token}` },
       });
 
-      if (response.status === 401) { // Неавторизован
+      if (response.status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         setIsAuthenticated(false);
@@ -187,7 +188,6 @@ const App = () => {
 
     checkAuth();
 
-    // Проверка токена каждые 5 минут
     const interval = setInterval(checkAuth, 300000);
     return () => clearInterval(interval);
   }, []);
@@ -326,7 +326,7 @@ const App = () => {
                     onAddByCode={handleAddByCode}
                 />
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
-                  <div>
+                  <div className="main-content-container">
                     <LectureList
                         lectures={filteredLectures}
                         openModal={openModal}
@@ -335,13 +335,13 @@ const App = () => {
                         isSearching={isSearching}
                         generateShareCode={generateShareCode}
                     />
-                    {isModalOpen && (
-                        <Modal
-                            lecture={currentLecture}
-                            saveLecture={saveLecture}
-                            closeModal={closeModal}
-                        />
-                    )}
+                    <div className="editor-container">
+                      <Modal
+                          lecture={currentLecture}
+                          saveLecture={saveLecture}
+                          closeModal={closeModal}
+                      />
+                    </div>
                     {showCodeModal && (
                         <CodeModal
                             code={generatedCode}

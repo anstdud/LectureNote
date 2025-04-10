@@ -20,8 +20,6 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
             setText('');
             setIsEditing(true);
         }
-
-        setIsOpen(true);
     }, [lecture]);
 
     const handleClose = () => {
@@ -36,7 +34,10 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
     const handleSave = () => {
         if (title.trim() && text.trim()) {
             saveLecture({ title, text });
-            handleClose();
+            if (!lecture) {
+                setTitle('');
+                setText('');
+            }
         }
     };
 
@@ -130,11 +131,16 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
         });
     };
 
+    // Modal.js (измененная разметка)
     return (
-        <div className={`lecture-modal ${isOpen ? 'open' : ''} ${isClosing ? 'closing' : ''}`}>
+        <div className="lecture-modal">
             <div className="lecture-modal-content">
-                <button className="close-btn" onClick={handleClose}>
-                    <img src={Close} alt="Закрыть" />
+                <button className="close-btn" onClick={closeModal}>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                         stroke="#201209" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
                 </button>
                 <div className="lectures-modal-text-container">
                     <input
@@ -153,20 +159,22 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
                         disabled={!isEditing}
                     ></textarea>
 
-                    {!isEditing ? (
-                        <div className="lectures-button-container">
-                            <button className="lectures-exportbtn" onClick={handleExport}>
-                                Отправить
+                    <div className="lectures-button-container">
+                        {!isEditing ? (
+                            <div className="view-mode-buttons">
+                                <button className="lectures-editbtn" onClick={() => setIsEditing(true)}>
+                                    Изменить
+                                </button>
+                                <button className="lectures-exportbtn" onClick={handleExport}>
+                                    Отправить
+                                </button>
+                            </div>
+                        ) : (
+                            <button className="lectures-savebtn" onClick={handleSave}>
+                                Сохранить
                             </button>
-                            <button className="lectures-editbtn" onClick={handleEdit}>
-                                Изменить
-                            </button>
-                        </div>
-                    ) : (
-                        <button className="lectures-savebtn" onClick={handleSave}>
-                            Сохранить
-                        </button>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

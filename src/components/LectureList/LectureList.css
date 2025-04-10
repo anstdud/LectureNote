@@ -1,23 +1,50 @@
 .lectures-list {
+    flex: 1;
+    max-width: 33.33%;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    padding: 0;
+    margin-right: 20px;
+    overflow-y: auto;
+}
+
+.list-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.lectures-btn-create {
+    background-color: #548B74;
+    color: #FAF3EB;
+    border: none;
+    border-radius: 20px;
+    padding: 12px 24px;
+    font-size: 17px;
+    cursor: pointer;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
 }
 
 .lecture-item {
     width: 100%;
-    height: 55px;
+    height: 60px;
     display: flex;
     align-items: center;
     background-color: unset;
     border: none;
-    margin-top: 10px;
     font-size: 17px;
     font-family: "TaylorSans", sans-serif;
     position: relative;
     border-bottom: 1px solid #38303B;
     cursor: pointer;
     padding: 0;
+    margin: 10px 0;
 }
 
 .lecture-item-content {
@@ -28,7 +55,6 @@
     color: inherit;
     font-size: inherit;
     line-height: 30px;
-    margin-right: auto;
     position: relative;
     flex-grow: 1;
     height: 100%;
@@ -39,6 +65,7 @@
     height: 35px;
     border-radius: 50%;
     background-color: #F9DABD;
+    color: #548B74;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -47,24 +74,25 @@
     line-height: 1;
 }
 
-.lectures-btn-import {
+.lectures-btn-import,
+.lectures-btn-create {
     background-color: #548B74;
     color: #FAF3EB;
     border: none;
     border-radius: 20px;
-    padding: 10px 20px;
-    font-size: 17px;
+    padding: 12px 24px;
+    font-size: 16px;
     cursor: pointer;
-    margin-top: 10px;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: background-color 0.3s;
 }
 
-.lectures-btn-import .circle-icon {
-    background-color: #FAF3EB;
-    color: #548B74;
-    margin-right: 10px;
+.lectures-btn-import:hover,
+.lectures-btn-create:hover {
+    background-color: #476f5c;
 }
 
 .lecture-actions {
