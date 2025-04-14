@@ -23,7 +23,6 @@ const ProtectedRoute = ({ children, isAuthenticated }) => {
 const App = () => {
   const [lectures, setLectures] = useState([]);
   const [filteredLectures, setFilteredLectures] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentLecture, setCurrentLecture] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     const token = localStorage.getItem('token');
@@ -41,8 +40,8 @@ const App = () => {
   const [showCodeModal, setShowCodeModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [generatedCode, setGeneratedCode] = useState('');
-  const [userRole, setUserRole] = useState(localStorage.getItem('role') || '');
-  const [isAuthChecked, setIsAuthChecked] = useState(false);
+  const [userRole, setUserRole] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false); // Добавляем отдельное состояние для модалки
 
   useEffect(() => {
     const initializeAuth = () => {
@@ -86,6 +85,39 @@ const App = () => {
 
     initializeAuth();
   }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setIsAuthenticated(false);
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const username = payload.username;
+        const role = payload.role;
+        const exp = payload.exp;
+
+        if (exp * 1000 < Date.now()) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('username');
+          localStorage.removeItem('role');
+          setIsAuthenticated(false);
+          return;
+        }
+
+        localStorage.setItem('username', username);
+        localStorage.setItem('role', role);
+        setUserRole(role);
+      } catch (error) {
+        console.error('Ошибка декодирования токена:', error);
+        localStorage.removeItem('token');
+        setIsAuthenticated(false);
+      }
+    }
+  }, [isAuthenticated, setUserRole, setIsAuthenticated]);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -155,9 +187,7 @@ const App = () => {
       const token = localStorage.getItem('token');
 
       if (!token) {
-        setIsAuthenticated(false);
         setUserRole('');
-        setIsAuthChecked(true);
         return;
       }
 
@@ -167,27 +197,20 @@ const App = () => {
 
         if (!isTokenValid) {
           localStorage.removeItem('token');
-          setIsAuthenticated(false);
           setUserRole('');
-          setIsAuthChecked(true);
           return;
         }
 
-        setIsAuthenticated(true);
         setUserRole(payload.role || '');
-        setIsAuthChecked(true);
 
       } catch (error) {
         console.error('Ошибка:', error);
         localStorage.removeItem('token');
-        setIsAuthenticated(false);
         setUserRole('');
-        setIsAuthChecked(true);
       }
     };
 
     checkAuth();
-
     const interval = setInterval(checkAuth, 300000);
     return () => clearInterval(interval);
   }, []);
@@ -202,10 +225,9 @@ const App = () => {
   };
 
   const closeModal = () => {
-    setIsModalOpen(false);
     setCurrentLecture(null);
+    setIsModalOpen(false);
   };
-
   const saveLecture = async (lectureData) => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -324,6 +346,7 @@ const App = () => {
                     setIsAuthenticated={setIsAuthenticated}
                     onSearch={handleSearch}
                     onAddByCode={handleAddByCode}
+                    username={localStorage.getItem('username') || ''}
                 />
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <div className="main-content-container">
@@ -338,6 +361,7 @@ const App = () => {
                     <div className="editor-container">
                       <Modal
                           lecture={currentLecture}
+                          isOpen={isModalOpen}
                           saveLecture={saveLecture}
                           closeModal={closeModal}
                       />
@@ -364,6 +388,7 @@ const App = () => {
                     onSearch={handleSearch}
                     onAddByCode={handleAddByCode}
                     isProfilePage={true}
+                    username={localStorage.getItem('username') || ''}
                 />
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <TutoringPage userRole={userRole} />
@@ -379,6 +404,7 @@ const App = () => {
                     isProfilePage={true}
                     onSearch={() => {}}
                     onAddByCode={() => {}}
+                    username={localStorage.getItem('username') || ''}
                 />
                 <ProtectedRoute isAuthenticated={isAuthenticated}>
                   <ProfilePage />

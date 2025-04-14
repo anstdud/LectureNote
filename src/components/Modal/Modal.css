@@ -4,7 +4,7 @@
     background: #FAF3EB;
     position: relative;
     overflow: hidden;
-    padding-left: 20px; /* Добавляем боковые отступы */
+    padding-left: 20px;
 }
 
 .lectures-modal-text-container {
@@ -12,7 +12,8 @@
     flex-direction: column;
     flex-grow: 1;
     overflow: hidden;
-    height: calc(100% - 80px); /* Учитываем высоту кнопок */
+    height: calc(100% - 80px);
+    margin-top: 20px;
 }
 
 .lecture-modal-content {
@@ -25,7 +26,7 @@
 .close-btn {
     position: absolute;
     top: 0;
-    right: 0;
+    right: 5px;
     width: 24px;
     height: 24px;
     background: none;

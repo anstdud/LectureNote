@@ -4,25 +4,20 @@ import './Header.css';
 import Logo from '../img/logo.svg';
 import PropTypes from 'prop-types';
 
-const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, isProfilePage }) => {
+const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, isProfilePage, username }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const [username] = useState(localStorage.getItem('username') || '');
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const dropdownRef = useRef(null);
     const buttonRef = useRef(null);
     const searchRef = useRef(null);
     const navigate = useNavigate();
-    const [userRole, setUserRole] = useState('');
-
+    const userRole = localStorage.getItem('role') || '';
     const [isCodeInputOpen, setIsCodeInputOpen] = useState(false);
     const [shareCode, setShareCode] = useState('');
     const codeRef = useRef(null);
 
-    useEffect(() => {
-        const storedRole = localStorage.getItem('role');
-        setUserRole(storedRole || '');
-    }, [isAuthenticated]);
+
 
     const handleToggleMenu = (e) => {
         e.stopPropagation();
@@ -243,6 +238,7 @@ Header.propTypes = {
     onSearch: PropTypes.func,
     onAddByCode: PropTypes.func,
     isProfilePage: PropTypes.bool,
+    username: PropTypes.string,
 };
 
 export default Header;

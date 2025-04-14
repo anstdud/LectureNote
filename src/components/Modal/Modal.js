@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './Modal.css';
-import Close from '../img/chevron-down-solid.svg';
 import { Document, Packer, Paragraph, TextRun, AlignmentType } from 'docx';
 
-const Modal = ({ lecture, saveLecture, closeModal }) => {
+const Modal = ({ lecture, isOpen, saveLecture, closeModal }) => {
     const [title, setTitle] = useState('');
     const [text, setText] = useState('');
     const [isEditing, setIsEditing] = useState(true);
-    const [isClosing, setIsClosing] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
+    const [isClosing] = useState(false);
 
     useEffect(() => {
         if (lecture) {
@@ -22,13 +20,6 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
         }
     }, [lecture]);
 
-    const handleClose = () => {
-        setIsClosing(true);
-        setTimeout(() => {
-            closeModal();
-        }, 300);
-    };
-
     if ((!lecture && !isEditing) || (isClosing && !isOpen)) return null;
 
     const handleSave = () => {
@@ -39,10 +30,6 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
                 setText('');
             }
         }
-    };
-
-    const handleEdit = () => {
-        setIsEditing(true);
     };
 
     const capitalizeText = (input) => {
@@ -131,7 +118,6 @@ const Modal = ({ lecture, saveLecture, closeModal }) => {
         });
     };
 
-    // Modal.js (измененная разметка)
     return (
         <div className="lecture-modal">
             <div className="lecture-modal-content">
