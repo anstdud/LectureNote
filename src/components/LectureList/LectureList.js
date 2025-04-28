@@ -9,15 +9,6 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
     const menuRefs = useRef({});
     const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-    const updateMobile = useCallback(() => {
-        setIsMobile(window.innerWidth <= 768);
-    }, []);
-
-    useEffect(() => {
-        window.addEventListener('resize', updateMobile);
-        return () => window.removeEventListener('resize', updateMobile);
-    }, [updateMobile]);
-
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
