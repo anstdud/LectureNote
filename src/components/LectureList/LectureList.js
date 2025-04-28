@@ -7,7 +7,6 @@ import PropTypes from 'prop-types';
 const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSearching, generateShareCode }) => {
     const [openMenuId, setOpenMenuId] = useState(null);
     const menuRefs = useRef({});
-    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -84,14 +83,14 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
                         onClick={() => document.getElementById('fileInput').click()}
                     >
                         <span className="circle-icon">↑</span>
-                        {!isMobile && 'Импорт из файла'}
+                        Импорт из файла
                     </button>
                     <button
                         className="lectures-btn-create"
                         onClick={() => openModal(null)}
                     >
                         <span className="circle-icon">+</span>
-                        {!isMobile && 'Создать запись'}
+                        Создать запись
                     </button>
                 </div>
             )}

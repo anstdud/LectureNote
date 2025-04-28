@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import Logo from '../img/logo.svg';
@@ -23,25 +23,25 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
     const [shareCode, setShareCode] = useState('');
     const codeRef = useRef(null);
 
-    const handleToggleMenu = (e) => {
-        e.stopPropagation();
-        setIsDropdownOpen(prev => !prev);
-    };
-
-    const handleClickOutside = (event) => {
+    const handleClickOutside = useCallback((event) => {
         if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
             if (buttonRef.current && !buttonRef.current.contains(event.target)) {
                 setIsDropdownOpen(false);
             }
         }
-    };
+    }, [isDropdownOpen]);
 
     useEffect(() => {
         document.addEventListener('mousedown', handleClickOutside);
         return () => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
-    }, [isDropdownOpen]);
+    }, [handleClickOutside]);
+
+    const handleToggleMenu = (e) => {
+        e.stopPropagation();
+        setIsDropdownOpen(prev => !prev);
+    };
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -64,13 +64,6 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
         setSearchQuery(e.target.value);
         onSearch(e.target.value);
     };
-
-    useEffect(() => {
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, []);
 
     const handleCodeClick = () => {
         setIsCodeInputOpen(prev => !prev);
