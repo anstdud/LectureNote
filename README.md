@@ -46,6 +46,8 @@
 2. **Установить зависимости**
    ```bash
    npm install
+   npm install --save-dev cross-env
+   npm install --save-dev nodemon
    ```
 
 3. **Настройка БД**
@@ -82,6 +84,7 @@ CREATE TABLE tutors (
   price NUMERIC,
   available_days VARCHAR(3)[],
   available_time JSONB
+  additionale_info VARCHAR(300)
 );
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,

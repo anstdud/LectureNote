@@ -94,6 +94,7 @@
     height: 50px;
     box-sizing: border-box;
     margin-top: 10px;
+    margin-bottom: auto;
 }
 
 .view-mode-buttons {

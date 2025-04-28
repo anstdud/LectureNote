@@ -7,6 +7,16 @@ import PropTypes from 'prop-types';
 const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSearching, generateShareCode }) => {
     const [openMenuId, setOpenMenuId] = useState(null);
     const menuRefs = useRef({});
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+    const updateMobile = useCallback(() => {
+        setIsMobile(window.innerWidth <= 768);
+    }, []);
+
+    useEffect(() => {
+        window.addEventListener('resize', updateMobile);
+        return () => window.removeEventListener('resize', updateMobile);
+    }, [updateMobile]);
 
     const handleFileUpload = async (e) => {
         const file = e.target.files[0];
@@ -82,13 +92,15 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
                         className="lectures-btn-import"
                         onClick={() => document.getElementById('fileInput').click()}
                     >
-                        <span className="circle-icon">↑</span> Импорт из файла
+                        <span className="circle-icon">↑</span>
+                        {!isMobile && 'Импорт из файла'}
                     </button>
                     <button
                         className="lectures-btn-create"
                         onClick={() => openModal(null)}
                     >
-                        <span className="circle-icon">+</span> Создать запись
+                        <span className="circle-icon">+</span>
+                        {!isMobile && 'Создать запись'}
                     </button>
                 </div>
             )}
@@ -110,7 +122,7 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
                         <span className="circle-icon">
                             <img src={Book} alt="Книга" />
                         </span>
-                        {lecture.title}
+                        <span className="lecture-title">{lecture.title}</span>
                     </div>
 
                     <div className="lecture-actions">

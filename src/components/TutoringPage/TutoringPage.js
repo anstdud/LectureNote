@@ -22,10 +22,46 @@ const TutoringPage = ({ userRole }) => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [additionalInfo, setAdditionalInfo] = useState('');
-
+    const [isRefreshingBookings, setIsRefreshingBookings] = useState(false);
     const daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const daysOrder = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     const russianShortWeekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+
+    const refreshBookings = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
+
+        setIsRefreshingBookings(true);
+        setError(null);
+
+        try {
+            if (userRole === 'student') {
+                const response = await fetch(`http://localhost:5001/api/student/bookings?t=${Date.now()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+
+                if (!response.ok) throw new Error('Ошибка при загрузке бронирований');
+                const data = await response.json();
+                setStudentBookings(data);
+            } else {
+                const response = await fetch(`http://localhost:5001/api/tutoring?t=${Date.now()}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error('Ошибка при загрузке данных');
+                const data = await response.json();
+                setBookings(data.bookings || []);
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            setError('Ошибка при обновлении записей');
+        } finally {
+            setIsRefreshingBookings(false);
+        }
+    }, [userRole, navigate]);
 
     const formatShortWeekday = (locale, date) => {
         return russianShortWeekdays[date.getDay()];
@@ -120,9 +156,6 @@ const TutoringPage = ({ userRole }) => {
 
     useEffect(() => {
         fetchData();
-
-        const interval = setInterval(fetchData, 30000);
-        return () => clearInterval(interval);
     }, [fetchData]);
 
     const isDayBooked = (date) => {
@@ -378,7 +411,6 @@ const TutoringPage = ({ userRole }) => {
                             <div className="booking-modal">
                                 <div className="modal-content">
                                     <h3>Запланировать занятие с {selectedTutor.fullName}</h3>
-
                                     <div className="calendar-section">
                                         <Calendar
                                             minDate={new Date()}
@@ -434,11 +466,30 @@ const TutoringPage = ({ userRole }) => {
                     <div className="bookings-column">
                         <div className="bookings-header">
                             <h3>Мои занятия</h3>
-                            <div className="bookings-count">
-                                {studentBookings.length} запланировано
+                            <div className="bookings-header-right">
+                                <div className="bookings-count">
+                                    {studentBookings.length} запланировано
+                                </div>
+                                <button
+                                    className="refresh-button"
+                                    onClick={refreshBookings}
+                                    disabled={isRefreshingBookings}
+                                    title="Обновить список занятий"
+                                >
+                                    <svg
+                                        className={`refresh-icon ${isRefreshingBookings ? 'spinning' : ''}`}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        height="24px"
+                                        viewBox="0 -960 960 960"
+                                        width="24px"
+                                        fill="#548B74"
+                                    >
+                                        <path
+                                            d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-
                         <div className="bookings-list-container">
                             {studentBookings.length > 0 ? (
                                 <div className="bookings-list">
@@ -661,14 +712,33 @@ const TutoringPage = ({ userRole }) => {
                     <div className="teacher-calendar">
                         <div className="calendar-header">
                             <h3>Запланированные занятия</h3>
-                            <div className="calendar-legend">
-                                <div className="legend-item">
-                                    <div className="legend-marker booked"></div>
-                                    <span>Занято</span>
+                            <div className="calendar-header-right">
+                                <div className="calendar-legend">
+                                    <div className="legend-item">
+                                        <div className="legend-marker booked"></div>
+                                        <span>Занято</span>
+                                    </div>
                                 </div>
+                                <button
+                                    className="refresh-button"
+                                    onClick={refreshBookings}
+                                    disabled={isRefreshingBookings}
+                                    title="Обновить список занятий"
+                                >
+                                    <svg
+                                        className={`refresh-icon ${isRefreshingBookings ? 'spinning' : ''}`}
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        height="24px"
+                                        viewBox="0 -960 960 960"
+                                        width="24px"
+                                        fill="#548B74"
+                                    >
+                                        <path
+                                            d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/>
+                                    </svg>
+                                </button>
                             </div>
                         </div>
-
                         <div className="calendar-container">
                             <div className="calendar-wrapper">
                                 <Calendar

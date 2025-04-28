@@ -115,8 +115,6 @@ const ProfilePage = () => {
         <div className="profile-container">
             <div className="profile-content">
                 <h2 className="profile-title">Профиль пользователя</h2>
-
-                {/* Форма для изменения данных */}
                 <form onSubmit={handleSubmit}>
                     <div className="profile-field">
                         <label>Имя пользователя:</label>
@@ -164,7 +162,6 @@ const ProfilePage = () => {
                     )}
                 </form>
 
-                {/* Форма для изменения пароля */}
                 {passwordEditMode ? (
                     <form onSubmit={handlePasswordSubmit} className="password-form">
                         <div className="profile-field">

@@ -4,6 +4,12 @@ import './Header.css';
 import Logo from '../img/logo.svg';
 import PropTypes from 'prop-types';
 
+const roleTranslations = {
+    student: 'Студент',
+    teacher: 'Преподаватель',
+    admin: 'Администратор'
+};
+
 const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, isProfilePage, username }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -17,23 +23,25 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
     const [shareCode, setShareCode] = useState('');
     const codeRef = useRef(null);
 
-
-
     const handleToggleMenu = (e) => {
         e.stopPropagation();
         setIsDropdownOpen(prev => !prev);
     };
 
     const handleClickOutside = (event) => {
-        if (
-            dropdownRef.current &&
-            !dropdownRef.current.contains(event.target) &&
-            buttonRef.current &&
-            !buttonRef.current.contains(event.target)
-        ) {
-            setIsDropdownOpen(false);
+        if (isDropdownOpen && dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            if (buttonRef.current && !buttonRef.current.contains(event.target)) {
+                setIsDropdownOpen(false);
+            }
         }
     };
+
+    useEffect(() => {
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isDropdownOpen]);
 
     const handleLogout = () => {
         localStorage.removeItem('token');
@@ -210,11 +218,13 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
                                     </svg>
                                 )}
                             </button>
-                            <ul className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`}>
+                            <ul className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`} ref={dropdownRef}>
                                 <li>
                                     <Link to="/profile" className="profile-link">
                                         {username}
-                                        <span className="user-role">({userRole})</span>
+                                        <span className="user-role">
+                                            ({roleTranslations[userRole] || userRole})
+                                        </span>
                                     </Link>
                                 </li>
                                 <li>

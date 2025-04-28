@@ -1,68 +1,63 @@
 .lectures-list {
     flex: 1;
-    max-width: 33.33%;
+    width: 100%;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
-    padding: 0;
-    margin-right: 20px;
+    padding: 0 15px;
     overflow-y: auto;
 }
 
 .list-controls {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.lectures-btn-create {
-    background-color: #548B74;
-    color: #FAF3EB;
-    border: none;
-    border-radius: 20px;
-    padding: 12px 24px;
-    font-size: 17px;
-    cursor: pointer;
-    width: 100%;
-    display: flex;
-    align-items: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 15px 0;
     justify-content: center;
-    transition: background-color 0.3s;
 }
 
 .lecture-item {
     width: 100%;
-    height: 60px;
+    min-height: 60px;
     display: flex;
     align-items: center;
     background-color: unset;
     border: none;
-    font-size: 17px;
+    font-size: clamp(14px, 2.5vw, 17px);
     font-family: "TaylorSans", sans-serif;
     position: relative;
     border-bottom: 1px solid #38303B;
     cursor: pointer;
-    padding: 0;
-    margin: 10px 0;
+    padding: 10px 0;
+    margin: 5px 0;
 }
 
 .lecture-item-content {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     background: none;
     border: none;
     color: inherit;
-    font-size: inherit;
-    line-height: 30px;
+    line-height: 1.4;
     position: relative;
     flex-grow: 1;
     height: 100%;
+    width: calc(100% - 50px);
+}
+
+.lecture-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 80%;
 }
 
 .circle-icon {
-    width: 35px;
-    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+    width: clamp(30px, 8vw, 40px);
+    height: clamp(30px, 8vw, 40px);
     border-radius: 50%;
     background-color: #F9DABD;
     color: #548B74;
@@ -70,8 +65,8 @@
     justify-content: center;
     align-items: center;
     margin-right: 10px;
-    font-size: 26px;
-    line-height: 1;
+    font-size: clamp(18px, 4vw, 26px);
+    flex-shrink: 0;
 }
 
 .lectures-btn-import,
@@ -80,30 +75,22 @@
     color: #FAF3EB;
     border: none;
     border-radius: 20px;
-    padding: 12px 24px;
-    font-size: 16px;
+    padding: 10px 15px;
+    font-size: clamp(14px, 2vw, 16px);
     cursor: pointer;
-    width: 100%;
+    flex-grow: 1;
+    min-width: 150px;
+    max-width: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: background-color 0.3s;
-}
-
-.lectures-btn-import:hover,
-.lectures-btn-create:hover {
-    background-color: #476f5c;
-}
-
-.lecture-actions {
-    position: relative;
-    display: flex;
-    align-items: center;
+    gap: 8px;
 }
 
 .menu-toggle {
-    width: 40px;
-    height: 40px;
+    width: clamp(35px, 8vw, 40px);
+    height: clamp(35px, 8vw, 40px);
     background: none;
     border: none;
     cursor: pointer;
@@ -113,15 +100,7 @@
     align-items: center;
     transition: background-color 0.3s;
     color: #548B74;
-}
-
-.menu-toggle:hover {
-    background-color: #FAF3EB;
-}
-
-.menu-toggle svg {
-    width: 24px;
-    height: 24px;
+    flex-shrink: 0;
 }
 
 .dropdown-menu {
@@ -133,7 +112,9 @@
     list-style: none;
     margin: 0;
     padding: 0;
-    width: 150px;
+    min-width: 120px;
+    width: max-content;
+    max-width: 90vw;
     z-index: 1000;
     opacity: 0;
     transform: translateY(-10px);
@@ -142,32 +123,57 @@
     pointer-events: none;
 }
 
-.dropdown-menu.open {
-    opacity: 1;
-    transform: translateY(0);
-    pointer-events: auto;
-}
-
 .menu-item {
-    color: #201209;
-    background: none;
-    border: none;
-    text-decoration: none;
-    display: block;
-    width: 100%;
-    padding: 10px 15px;
-    font-size: 16px;
-    cursor: pointer;
-    text-align: left;
-    font-family: "TaylorSans", sans-serif;
-    transition: background-color 0.3s;
+    padding: 8px 12px;
+    font-size: clamp(14px, 2vw, 16px);
 }
 
-.menu-item:hover {
-    background-color: #FAF3EB;
-    border-radius: 5px;
+@media (max-width: 768px) {
+    .lectures-list {
+        padding: 0 10px;
+        margin-right: 0;
+    }
+
+    .lecture-item {
+        min-height: 50px;
+        padding: 8px 0;
+    }
+
+    .list-controls {
+        gap: 8px;
+        margin: 10px 0;
+    }
+
+    .lectures-btn-import,
+    .lectures-btn-create {
+        min-width: 120px;
+        padding: 8px 12px;
+    }
 }
 
-.menu-item:focus {
-    outline: none;
+@media (max-width: 480px) {
+    .lecture-title {
+        max-width: 70%;
+    }
+
+    .circle-icon {
+        margin-right: 5px;
+    }
+
+    .dropdown-menu {
+        right: -10px;
+    }
+}
+
+@media (hover: none) {
+    .menu-toggle:hover,
+    .lectures-btn-import:hover,
+    .lectures-btn-create:hover {
+        background-color: transparent;
+    }
+
+    .lectures-btn-import:active,
+    .lectures-btn-create:active {
+        background-color: #476f5c;
+    }
 }

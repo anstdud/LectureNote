@@ -1,6 +1,6 @@
 .main-content-container {
     display: flex;
-    height: calc(100vh - 60px); /* Учитываем высоту хедера */
+    height: calc(100vh - 80px);
     overflow: hidden;
 }
 
@@ -9,6 +9,6 @@
     background: #FAF3EB;
     border-left: 1px solid #201209;
     position: relative;
-    height: 100%; /* Фиксируем высоту */
+    height: 100%;
     overflow: hidden;
 }

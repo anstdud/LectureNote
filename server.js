@@ -20,6 +20,13 @@ app.use(cors({
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+app.options('*', (req, res) => {
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.sendStatus(200);
+});
+
+app.use(express.json());
+
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
@@ -28,11 +35,48 @@ const pool = new Pool({
     port: process.env.DB_PORT,
 });
 
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    next();
+});
+
 pool.connect()
     .then(() => console.log('Бд подключена'))
     .catch(err => console.error('Бд НЕ подключена:', err));
 
-const JWT_SECRET = 'your_jwt_secret_key';
+const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
+
+function authenticate(req, res, next) {
+    console.log(`[AUTH] Method: ${req.method}, Path: ${req.path}`);
+
+    if (req.method === 'OPTIONS') {
+        console.log('[AUTH] Skipping OPTIONS request');
+        return next();
+    }
+
+    const authHeader = req.headers.authorization;
+    console.log('[AUTH] Headers:', req.headers);
+
+    if (!authHeader) {
+        console.error('[AUTH] No authorization header');
+        return res.status(401).json({ error: 'Отсутствует токен' });
+    }
+
+    const token = authHeader.split(' ')[1];
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        console.log('[AUTH] Decoded token:', decoded);
+        req.user = decoded;
+        next();
+    } catch (err) {
+        console.error('[AUTH] Token error:', {
+            error: err.name,
+            message: err.message,
+            token: token?.slice(0, 15) + '...'
+        });
+        res.status(401).json({ error: 'Недействительный токен' });
+    }
+}
 
 app.post('/api/register', [
     body('username').isLength({ min: 3 }).trim().escape(),
@@ -281,7 +325,7 @@ app.get('/api/tutor', authenticate, async (req, res) => {
                 price,
                 available_days AS "availableDays",
                 available_time AS "availableTime",
-                COALESCE(additional_info, '') AS "additionalInfo"  -- Явно обрабатываем NULL
+                COALESCE(additional_info, '') AS "additionalInfo" 
             FROM tutors 
             WHERE user_id = $1
         `, [req.user.id]);
@@ -361,7 +405,7 @@ app.get('/api/student/bookings', authenticate, async (req, res) => {
              FROM bookings b
              JOIN tutors t ON b.tutor_id = t.user_id
              WHERE b.student_id = $1
-             ORDER BY b.datetime ASC`,  // Изменим сортировку на ASC для хронологического порядка
+             ORDER BY b.datetime ASC`,
             [req.user.id]
         );
         res.json(result.rows);
@@ -404,24 +448,6 @@ app.delete('/api/bookings/:id', authenticate, async (req, res) => {
         res.status(500).json({ error: 'Ошибка при отмене записи' });
     }
 });
-
-function authenticate(req, res, next) {
-    const token = req.headers.authorization?.split(' ')[1];
-
-    if (!token) {
-        return res.status(401).json({ error: 'Отсутствует токен' });
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('Декодированный токен:', decoded);
-        req.user = decoded;
-        next();
-    } catch (err) {
-        console.error('Ошибка токена:', err);
-        res.status(401).json({ error: 'Недействительный токен' });
-    }
-}
 
 app.get('/api/lectures', authenticate, async (req, res) => {
     const userId = req.user.id;
