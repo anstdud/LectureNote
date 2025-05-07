@@ -83,8 +83,8 @@ CREATE TABLE tutors (
   subject VARCHAR(100),
   price NUMERIC,
   available_days VARCHAR(3)[],
-  available_time JSONB
-  additionale_info VARCHAR(300)
+  available_time JSONB,
+  additional_info VARCHAR(300)
 );
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,
@@ -108,10 +108,10 @@ CREATE TABLE bookings (
   
 4. **Запуск приложения**
    ```bash
-   # Запуск клиента
-   npm start
-   # Запуск сервера
-   node server.js
+   # Терминал 1 (бэкенд)
+   npm run start:server
+   # Терминал 2 (фронтенд)
+   npm run start:client
    ```
 
 ## 🗂 Структура проекта (ключевые элементы)
