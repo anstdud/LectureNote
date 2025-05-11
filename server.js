@@ -79,10 +79,17 @@ function authenticate(req, res, next) {
 }
 
 app.post('/api/register', [
-    body('username').isLength({ min: 3 }).trim().escape(),
-    body('password').isLength({ min: 6 }).trim().escape(),
-    body('email').isEmail().normalizeEmail(),
-    body('role').optional().isIn(['student', 'teacher', 'admin'])
+        body('username')
+            .isLength({ min: 3 }).withMessage('Логин должен быть не менее 3 символов')
+            .trim().escape(),
+        body('password')
+            .isLength({ min: 6 }).withMessage('Пароль должен быть не менее 6 символов')
+            .trim().escape(),
+        body('email')
+            .isEmail().withMessage('Некорректный email')
+            .normalizeEmail(),
+        body('role').optional().isIn(['student', 'teacher', 'admin'])
+            .withMessage('Недопустимая роль пользователя')
 ], async (req, res) => {
     console.log('Received registration data:', req.body);
 
@@ -113,8 +120,12 @@ app.post('/api/register', [
 });
 
 app.post('/api/login', [
-    body('username').trim().escape(),
-    body('password').trim().escape(),
+    body('username')
+        .notEmpty().withMessage('Логин обязателен')
+        .trim().escape(),
+    body('password')
+        .notEmpty().withMessage('Пароль обязателен')
+        .trim().escape(),
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -236,8 +247,8 @@ app.post('/api/tutoring', authenticate, [
         }
 
         const timeBooked = await pool.query(
-            'SELECT id FROM bookings WHERE tutor_id = $1 AND datetime = $2',
-            [tutorId, datetime]
+            'SELECT id FROM bookings WHERE datetime = $1',
+            [datetime]
         );
 
         if (timeBooked.rows.length > 0) {
@@ -250,6 +261,18 @@ app.post('/api/tutoring', authenticate, [
         );
 
         res.status(201).json(result.rows[0]);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.get('/api/bookings/all-occupied', authenticate, async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT TO_CHAR(datetime, \'YYYY-MM-DD"T"HH24:MI:SS\') as datetime FROM bookings'
+        );
+        res.json(result.rows.map(row => row.datetime));
     } catch (err) {
         console.error('Ошибка:', err);
         res.status(500).json({ error: 'Ошибка сервера' });
@@ -341,18 +364,28 @@ app.get('/api/tutor', authenticate, async (req, res) => {
 app.get('/api/tutors', authenticate, async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT 
+            SELECT
                 u.id,
                 t.full_name AS "fullName",
                 t.subject,
                 t.price,
                 t.available_days AS "availableDays",
-                t.available_time AS "availableTime",
+                t.available_time->>'start' as start_time,
+                t.available_time->>'end' as end_time,
                 t.additional_info AS "additionalInfo"
             FROM tutors t
-            JOIN users u ON t.user_id = u.id
+                JOIN users u ON t.user_id = u.id
         `);
-        res.json(result.rows);
+
+        const tutors = result.rows.map(tutor => ({
+            ...tutor,
+            availableTime: {
+                start: tutor.start_time,
+                end: tutor.end_time
+            }
+        }));
+
+        res.json(tutors);
     } catch (err) {
         console.error('Ошибка:', err);
         res.status(500).json({ error: 'Ошибка сервера' });

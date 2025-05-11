@@ -26,6 +26,20 @@ const TutoringPage = ({ userRole }) => {
     const daysOfWeek = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const daysOrder = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     const russianShortWeekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
+    const [occupiedTimes, setOccupiedTimes] = useState([]);
+
+    const fetchOccupied = useCallback(async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5001/api/bookings/all-occupied', {
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+            const data = await response.json();
+            setOccupiedTimes(data);
+        } catch (error) {
+            console.error('Ошибка загрузки занятых времен:', error);
+        }
+    }, []);
 
     const refreshBookings = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -61,7 +75,7 @@ const TutoringPage = ({ userRole }) => {
         } finally {
             setIsRefreshingBookings(false);
         }
-    }, [userRole, navigate]);
+    }, [userRole, navigate, fetchOccupied]);
 
     const formatShortWeekday = (locale, date) => {
         return russianShortWeekdays[date.getDay()];
@@ -81,6 +95,22 @@ const TutoringPage = ({ userRole }) => {
         document.body.appendChild(alert);
         setTimeout(() => alert.remove(), 3000);
     };
+
+    useEffect(() => {
+        const fetchOccupiedTimes = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('http://localhost:5001/api/bookings/all-occupied', {
+                    headers: { 'Authorization': `Bearer ${token}` },
+                });
+                const data = await response.json();
+                setOccupiedTimes(data);
+            } catch (error) {
+                console.error('Ошибка загрузки занятых времен:', error);
+            }
+        };
+        fetchOccupiedTimes();
+    }, []);
 
     const fetchData = useCallback(async () => {
         const token = localStorage.getItem('token');
@@ -155,8 +185,12 @@ const TutoringPage = ({ userRole }) => {
     }, [userRole, navigate]);
 
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        const fetchInitialData = async () => {
+            await fetchData();
+            await fetchOccupied();
+        };
+        fetchInitialData();
+    }, [fetchData, fetchOccupied]);
 
     const isDayBooked = (date) => {
         if (!bookings || !Array.isArray(bookings)) return false;
@@ -194,8 +228,15 @@ const TutoringPage = ({ userRole }) => {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Ошибка сервера');
+                let errorMessage = 'Ошибка сервера';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    const text = await response.text();
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
 
             const updatedProfile = await response.json();
@@ -227,8 +268,17 @@ const TutoringPage = ({ userRole }) => {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 
-            if (!response.ok) throw new Error('Ошибка удаления профиля');
-
+            if (!response.ok) {
+                let errorMessage = 'Ошибка удаления профиля';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    const text = await response.text();
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
             setIsProfileCreated(false);
             setSubject('');
             setPrice('');
@@ -272,13 +322,24 @@ const TutoringPage = ({ userRole }) => {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || 'Ошибка при планировании занятия');
+                let errorMessage = 'Ошибка при планировании занятия';
+
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    const text = await response.text();
+                    errorMessage = text || errorMessage;
+                }
+
+                throw new Error(errorMessage);
             }
 
             showCustomAlert('Занятие успешно запланировано!');
             await fetchData();
             setSelectedTutor(null);
+
+            await fetchOccupied();
         } catch (error) {
             console.error('Ошибка:', error);
             showCustomAlert(error.message, true);
@@ -286,27 +347,33 @@ const TutoringPage = ({ userRole }) => {
     };
 
     const isTimeSlotAvailable = (time) => {
-        try {
-            if (!time || !selectedTutor || !isDayAvailable(calendarDate)) return false;
+        if (!selectedTutor || !isDayAvailable(calendarDate)) return false;
 
-            const selectedTime = new Date(`1970-01-01T${time}:00`);
-            const startTime = new Date(`1970-01-01T${selectedTutor.availableTime.start}:00`);
-            const endTime = new Date(`1970-01-01T${selectedTutor.availableTime.end}:00`);
+        const [startHour, startMinute] = selectedTutor.availableTime.start.split(':');
+        const [endHour, endMinute] = selectedTutor.availableTime.end.split(':');
+        const slotTime = new Date(`1970-01-01T${time}:00`);
+        const tutorStart = new Date(`1970-01-01T${startHour}:${startMinute}:00`);
+        const tutorEnd = new Date(`1970-01-01T${endHour}:${endMinute}:00`);
 
-            if (selectedTime < startTime || selectedTime > endTime) return false;
-
-            const selectedDate = calendarDate.toLocaleDateString('en-CA');
-            const selectedDateTime = new Date(`${selectedDate}T${time}:00`).toISOString();
-
-            return !bookings.some(booking => {
-                const bookingDateTime = new Date(booking.datetime).toISOString();
-                return bookingDateTime === selectedDateTime;
-            });
-        } catch (error) {
-            console.error('Ошибка в isTimeSlotAvailable:', error);
+        if (slotTime < tutorStart || slotTime >= tutorEnd) {
             return false;
         }
+
+        const selectedDate = new Date(calendarDate);
+        const year = selectedDate.getFullYear();
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+
+        const datetimeToCheck = `${year}-${month}-${day}T${time}:00`;
+
+        return !occupiedTimes.includes(datetimeToCheck);
     };
+
+    useEffect(() => {
+        if (selectedTutor) {
+            fetchOccupied();
+        }
+    }, [calendarDate, selectedTutor, fetchOccupied]);
 
     const handleCancelBooking = async (bookingId) => {
         try {
@@ -316,10 +383,20 @@ const TutoringPage = ({ userRole }) => {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
 
-            if (!response.ok) throw new Error('Ошибка при отмене занятия');
-
+            if (!response.ok) {
+                let errorMessage = 'Ошибка при отмене занятия';
+                try {
+                    const errorData = await response.json();
+                    errorMessage = errorData.error || errorMessage;
+                } catch (e) {
+                    const text = await response.text();
+                    errorMessage = text || errorMessage;
+                }
+                throw new Error(errorMessage);
+            }
             showCustomAlert('Занятие успешно отменено!');
             await fetchData();
+            await fetchOccupied();
         } catch (error) {
             console.error('Ошибка:', error);
             showCustomAlert('Ошибка при отмене занятия', true);
@@ -338,6 +415,34 @@ const TutoringPage = ({ userRole }) => {
     const sortedAvailableDays = (days) => {
         return daysOrder.filter(day => days.includes(day));
     };
+
+    const generateTimeSlots = () => {
+        if (!selectedTutor || !isDayAvailable(calendarDate)) return [];
+
+        const slots = [];
+        const [startHour, startMinute] = selectedTutor.availableTime.start.split(':');
+        const [endHour, endMinute] = selectedTutor.availableTime.end.split(':');
+
+        let current = new Date();
+        current.setHours(parseInt(startHour), parseInt(startMinute), 0, 0);
+
+        const end = new Date();
+        end.setHours(parseInt(endHour), parseInt(endMinute), 0, 0);
+
+        while (current < end) {
+            const timeString = current.toTimeString().slice(0, 5);
+            const isAvailable = isTimeSlotAvailable(timeString);
+
+            slots.push({
+                time: timeString,
+                available: isAvailable
+            });
+            current.setHours(current.getHours() + 1);
+        }
+        return slots;
+    };
+
+
 
     if (isLoading) {
         return (
@@ -427,20 +532,18 @@ const TutoringPage = ({ userRole }) => {
 
                                     <div className="time-selection">
                                         <label>Выберите время:</label>
-                                        <input
-                                            type="time"
-                                            value={selectedDateTime}
-                                            onChange={e => {
-                                                const time = e.target.value;
-                                                if (time && isTimeSlotAvailable(time)) {
-                                                    setSelectedDateTime(time);
-                                                }
-                                            }}
-                                            className="time-input"
-                                            min={selectedTutor.availableTime.start}
-                                            max={selectedTutor.availableTime.end}
-                                            disabled={!isDayAvailable(calendarDate)}
-                                        />
+                                        <div className="time-slots">
+                                            {generateTimeSlots().map((slot, index) => (
+                                                <button
+                                                    key={index}
+                                                    className={`time-slot ${slot.available ? 'available' : 'booked'}${selectedDateTime === slot.time ? 'selected' : ''}`}
+                                                    onClick={() => slot.available && setSelectedDateTime(slot.time)}
+                                                    disabled={!slot.available}>
+                                                    {slot.time} - {new Date(new Date(`1970-01-01T${slot.time}:00`).getTime() + 60*60*1000)
+                                                    .toTimeString().slice(0, 5)}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
 
                                     <div className="modal-actions">

@@ -49,6 +49,11 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
         e.preventDefault();
         const registerData = { username, password, email, role };
 
+        if (password.length < 6) {
+            showCustomAlert('Пароль должен быть не менее 6 символов', true);
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:5001/api/register', {
                 method: 'POST',

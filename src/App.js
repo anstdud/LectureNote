@@ -277,6 +277,11 @@ const App = () => {
 
       setLectures(prev => prev.filter(l => l.id !== id));
       setFilteredLectures(prev => prev.filter(l => l.id !== id));
+
+      if (currentLecture?.id === id) {
+        setCurrentLecture(null);
+        closeModal();
+      }
     } catch (error) {
       console.error('Ошибка:', error);
       alert('Ошибка при удалении лекции');
