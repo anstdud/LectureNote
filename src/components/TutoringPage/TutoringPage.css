@@ -811,3 +811,71 @@
         padding: 20px;
     }
 }
+
+@media (max-width: 480px) {
+    .tutoring-container {
+        padding: 0 10px;
+    }
+
+    .tutor-card {
+        padding: 12px;
+    }
+
+    .tutor-price {
+        font-size: 14px;
+    }
+
+    .booking-datetime {
+        font-size: 13px;
+    }
+
+    .cancel-booking-button {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .profile-info-value {
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        padding: 10px 12px;
+        font-size: 14px;
+    }
+
+    .submit-button {
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .tutoring-container h2 {
+        font-size: 22px;
+    }
+
+    .tutors-column h3,
+    .bookings-column h3 {
+        font-size: 18px;
+    }
+
+    .day-checkbox-item label {
+        padding: 5px 10px;
+    }
+
+    .time-range-container {
+        flex-direction: column;
+    }
+
+    .booking-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .cancel-booking-button {
+        margin-left: 0;
+        width: 100%;
+    }
+}

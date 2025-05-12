@@ -1,131 +1,251 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { showCustomAlert } from '../Notifications/Notifications.js';
 import './AuthModal.css';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [email, setEmail] = useState('');
-    const [role, setRole] = useState('student');
+    const [formData, setFormData] = useState({
+        username: '',
+        password: '',
+        email: '',
+        confirmPassword: '',
+        role: 'student'
+    });
     const [isRegister, setIsRegister] = useState(false);
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [formValid, setFormValid] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
+    const validateForm = useCallback(() => {
+        const basicValidation = formData.username.trim() && formData.password.trim();
+        if (isRegister) {
+            return basicValidation &&
+                formData.password === formData.confirmPassword &&
+                formData.password.length >= 6 &&
+                /\S+@\S+\.\S+/.test(formData.email);
+        }
+        return basicValidation;
+    }, [formData, isRegister]);
+
+    useEffect(() => {
+        setFormValid(validateForm());
+    }, [formData, validateForm]);
+
+    const handleInputChange = useCallback((field) => (e) => {
+        setFormData(prev => ({ ...prev, [field]: e.target.value }));
+        setError('');
+    }, []);
+
+    const handleAuthSuccess = useCallback((token, role, username) => {
+        localStorage.setItem('token', token);
+        localStorage.setItem('username', username);
+        localStorage.setItem('role', role);
+
+        setIsAuthenticated(true);
+        setUserRole(role);
+        navigate(location.state?.from?.pathname || '/', { replace: true });
+    }, [setIsAuthenticated, setUserRole, navigate, location]);
+
     const handleLogin = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         try {
             const response = await fetch('http://localhost:5001/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({
+                    username: formData.username,
+                    password: formData.password
+                }),
             });
 
+            const data = await response.json();
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Ошибка при входе');
+                const errorMessage = data.error || 'Ошибка при входе';
+                throw new Error(errorMessage);
             }
 
-            const { token, role, username: responseUsername } = await response.json();
-
-            localStorage.setItem('token', token);
-            localStorage.setItem('username', responseUsername);
-            localStorage.setItem('role', role);
-
-            setIsAuthenticated(true);
-            setUserRole(role);
-
-            const from = location.state?.from?.pathname || '/';
-            navigate(from, { replace: true });
-
+            handleAuthSuccess(data.token, data.role, data.username);
         } catch (err) {
-            console.error('Ошибка:', err);
+            console.error('Login Error:', err);
+            showCustomAlert(err.message, true);
             setError(err.message);
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const handleRegister = async (e) => {
         e.preventDefault();
-        const registerData = { username, password, email, role };
+        setIsLoading(true);
 
-        if (password.length < 6) {
+        if (formData.password.length < 6) {
             showCustomAlert('Пароль должен быть не менее 6 символов', true);
+            setIsLoading(false);
             return;
         }
 
         try {
             const response = await fetch('http://localhost:5001/api/register', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(registerData),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: formData.username,
+                    password: formData.password,
+                    email: formData.email,
+                    role: formData.role
+                }),
             });
 
-            const responseData = await response.json();
-
+            const data = await response.json();
             if (!response.ok) {
-                const errorMessage = responseData.errors
-                    ? responseData.errors.map(e => e.msg).join(', ')
-                    : responseData.error || 'Ошибка регистрации';
+                const errorMessage = data.errors
+                    ? data.errors.map(e => e.msg).join(', ')
+                    : data.error || 'Ошибка регистрации';
                 throw new Error(errorMessage);
             }
 
-            if (responseData.id) {
-                showCustomAlert('Регистрация успешна!');
-                setIsRegister(false);
-            }
+            showCustomAlert('Регистрация успешна! Авторизуйтесь');
+            setIsRegister(false);
+            setFormData({
+                username: '',
+                password: '',
+                email: '',
+                confirmPassword: '',
+                role: 'student'
+            });
         } catch (err) {
-            console.error('Ошибка:', err);
+            console.error('Registration Error:', err);
             showCustomAlert(err.message, true);
+        } finally {
+            setIsLoading(false);
         }
     };
 
+    const handleToggleForm = useCallback(() => {
+        setIsRegister(prev => !prev);
+        setError('');
+        setFormData({
+            username: '',
+            password: '',
+            email: '',
+            confirmPassword: '',
+            role: 'student'
+        });
+    }, []);
+
     return (
         <div className="auth-modal">
-            <div>
-                <h2>{isRegister ? 'Регистрация' : 'Вход'}</h2>
-                {error && <p className="error-message">{error}</p>}
-                <input
-                    type="text"
-                    placeholder="Имя пользователя"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Пароль"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
-                {isRegister && (
-                    <>
+            <div className="auth-modal__container">
+                <h2 className="auth-modal__title">
+                    {isRegister ? 'Регистрация' : 'Вход'}
+                </h2>
+
+                {error && <p className="auth-modal__error">{error}</p>}
+
+                <form className="auth-modal__form" onSubmit={isRegister ? handleRegister : handleLogin}>
+                    <div className="auth-modal__input-group">
+                        <label htmlFor="username" className="auth-modal__label">
+                            Имя пользователя
+                        </label>
                         <input
-                            type="email"
-                            placeholder="Email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
+                            id="username"
+                            type="text"
+                            className="auth-modal__input"
+                            value={formData.username}
+                            onChange={handleInputChange('username')}
+                            disabled={isLoading}
+                            required
                         />
-                        <select
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            className="role-select"
-                        >
-                            <option value="student">Студент</option>
-                            <option value="teacher">Преподаватель</option>
-                        </select>
-                    </>
-                )}
-                <button onClick={isRegister ? handleRegister : handleLogin}>
-                    {isRegister ? 'Зарегистрироваться' : 'Войти'}
-                </button>
-                <button onClick={() => {
-                    setIsRegister(!isRegister);
-                    setError('');
-                }}>
-                    {isRegister ? 'Есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
-                </button>
+                    </div>
+
+                    <div className="auth-modal__input-group">
+                        <label htmlFor="password" className="auth-modal__label">
+                            Пароль
+                        </label>
+                        <input
+                            id="password"
+                            type="password"
+                            className="auth-modal__input"
+                            value={formData.password}
+                            onChange={handleInputChange('password')}
+                            disabled={isLoading}
+                            required
+                            minLength={6}
+                        />
+                    </div>
+
+                    {isRegister && (
+                        <>
+                            <div className="auth-modal__input-group">
+                                <label htmlFor="confirmPassword" className="auth-modal__label">
+                                    Подтвердите пароль
+                                </label>
+                                <input
+                                    id="confirmPassword"
+                                    type="password"
+                                    className="auth-modal__input"
+                                    value={formData.confirmPassword}
+                                    onChange={handleInputChange('confirmPassword')}
+                                    disabled={isLoading}
+                                    required
+                                />
+                            </div>
+
+                            <div className="auth-modal__input-group">
+                                <label htmlFor="email" className="auth-modal__label">
+                                    Email
+                                </label>
+                                <input
+                                    id="email"
+                                    type="email"
+                                    className="auth-modal__input"
+                                    value={formData.email}
+                                    onChange={handleInputChange('email')}
+                                    disabled={isLoading}
+                                    required
+                                />
+                            </div>
+
+                            <div className="auth-modal__input-group">
+                                <label htmlFor="role" className="auth-modal__label">
+                                    Роль
+                                </label>
+                                <select
+                                    id="role"
+                                    className="auth-modal__select"
+                                    value={formData.role}
+                                    onChange={handleInputChange('role')}
+                                    disabled={isLoading}
+                                >
+                                    <option value="student">Студент</option>
+                                    <option value="teacher">Преподаватель</option>
+                                </select>
+                            </div>
+                        </>
+                    )}
+
+                    <button
+                        type="submit"
+                        className={`auth-modal__button ${isLoading ? 'auth-modal__button--loading' : ''}`}
+                        disabled={!formValid || isLoading}
+                    >
+                        {isLoading ? 'Загрузка...' : isRegister ? 'Зарегистрироваться' : 'Войти'}
+                    </button>
+
+                    <button
+                        type="button"
+                        className="auth-modal__toggle-button"
+                        onClick={handleToggleForm}
+                        disabled={isLoading}
+                    >
+                        {isRegister
+                            ? 'Есть аккаунт? Войти'
+                            : 'Нет аккаунта? Зарегистрироваться'}
+                    </button>
+                </form>
             </div>
         </div>
     );
