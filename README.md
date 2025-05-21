@@ -84,14 +84,26 @@ CREATE TABLE tutors (
   price NUMERIC,
   available_days VARCHAR(3)[],
   available_time JSONB,
-  additional_info VARCHAR(300)
+  additional_info VARCHAR(300),
+  is_verified BOOLEAN DEFAULT FALSE
 );
+  
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id),
     tutor_id INTEGER REFERENCES users(id),
     datetime TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+  
+  CREATE TABLE tutor_verifications (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    document_url VARCHAR(255) NOT NULL,
+    status VARCHAR(20) DEFAULT 'pending',
+    verified_by INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP
 );
     ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'student';
 ```
