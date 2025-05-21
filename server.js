@@ -5,6 +5,8 @@ import jwt from 'jsonwebtoken';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
+import multer from 'multer';
+import { existsSync, mkdirSync } from 'fs';
 
 dotenv.config();
 
@@ -12,7 +14,19 @@ const { Pool } = pkg;
 const app = express();
 const port = process.env.PORT || 5001;
 
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+const upload = multer({ storage });
+
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true,
@@ -660,7 +674,7 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
 app.get('/api/user', authenticate, async (req, res) => {
     try {
         const result = await pool.query(
-            'SELECT username, email FROM users WHERE id = $1',
+            'SELECT username, email, full_name, phone_number, city, education, bio, avatar_url, role  FROM users WHERE id = $1',
             [req.user.id]
         );
 
@@ -676,15 +690,28 @@ app.get('/api/user', authenticate, async (req, res) => {
 });
 
 app.put('/api/user', authenticate, [
-    body('username').isLength({ min: 3 }).trim().escape(),
-    body('email').isEmail().normalizeEmail(),
+    // body('username').isLength({ min: 3 }).trim().escape(),
+    // body('email').isEmail().normalizeEmail(),
+    body('full_name').optional().trim().escape(),
+    body('phone_number').optional().trim().escape(),
+    body('city').optional().trim().escape(),
+    body('education').optional().trim().escape(),
+    body('bio').optional().trim().escape(),
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, email } = req.body;
+    const {
+        username,
+        email,
+        full_name,
+        phone_number,
+        city,
+        education,
+        bio
+    } = req.body;
     const userId = req.user.id;
 
     try {
@@ -697,11 +724,13 @@ app.put('/api/user', authenticate, [
         }
 
         const result = await pool.query(
-            `UPDATE users 
-       SET username = $1, email = $2 
-       WHERE id = $3 
-       RETURNING id, username, email`,
-            [username, email, userId]
+            `UPDATE users
+             SET username = $1, email = $2,
+                 full_name = $3, phone_number = $4,
+                 city = $5, education = $6, bio = $7
+             WHERE id = $8
+                 RETURNING *`,
+            [username, email, full_name, phone_number, city, education, bio, req.user.id]
         );
 
         res.json(result.rows[0]);
@@ -744,6 +773,79 @@ app.put('/api/user/password', authenticate, [
     } catch (err) {
         console.error('Ошибка обновления пароля:', err);
         res.status(500).json({ error: 'Ошибка обновления пароля' });
+    }
+});
+
+if (!existsSync('uploads')) {
+    mkdirSync('uploads', { recursive: true });
+}
+
+app.post('/api/upload-avatar', authenticate, upload.single('avatar'), async (req, res) => {
+    try {
+        const avatarUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+        await pool.query(
+            'UPDATE users SET avatar_url = $1 WHERE id = $2',
+            [avatarUrl, req.user.id]
+        );
+        res.json({ avatarUrl });
+    } catch (err) {
+        res.status(500).json({ error: 'Ошибка загрузки аватара' });
+    }
+});
+
+const documentStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/documents/');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+const uploadDocument = multer({ storage: documentStorage });
+
+app.post('/api/tutor/upload-document', authenticate, uploadDocument.single('document'), async (req, res) => {
+    if (req.user.role !== 'teacher') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+    try {
+        const tutor = await pool.query('SELECT id FROM tutors WHERE user_id = $1', [req.user.id]);
+        if (!tutor.rows.length) return res.status(400).json({ error: 'Сначала создайте профиль преподавателя' });
+
+        const documentUrl = `${req.protocol}://${req.get('host')}/uploads/documents/${req.file.filename}`;
+
+        await pool.query('DELETE FROM tutor_verifications WHERE user_id = $1 AND status = $2',
+            [req.user.id, 'pending']);
+
+        await pool.query(
+            'INSERT INTO tutor_verifications (user_id, document_url) VALUES ($1, $2)',
+            [req.user.id, documentUrl]
+        );
+        res.json({ message: 'Документ отправлен на проверку', documentUrl });
+    } catch (error) {
+        console.error('Ошибка:', error);
+        res.status(500).json({ error: 'Ошибка загрузки документа' });
+    }
+});
+
+app.get('/api/tutor/verification-status', authenticate, async (req, res) => {
+    if (req.user.role !== 'teacher') return res.status(403).json({ error: 'Доступ запрещен' });
+
+    try {
+        const result = await pool.query(
+            `SELECT tv.status, tv.document_url, tv.updated_at, u.username AS verified_by 
+             FROM tutor_verifications tv
+             LEFT JOIN users u ON tv.verified_by = u.id
+             WHERE tv.user_id = $1 
+             ORDER BY tv.created_at DESC 
+             LIMIT 1`,
+            [req.user.id]
+        );
+
+        res.json(result.rows[0] || { status: 'not_submitted' });
+    } catch (error) {
+        console.error('Ошибка:', error);
+        res.status(500).json({ error: 'Ошибка получения статуса' });
     }
 });
 
