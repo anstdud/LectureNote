@@ -485,6 +485,9 @@ const TutoringPage = ({ userRole }) => {
                                 <div key={tutor.id} className="tutor-card">
                                     <div className="tutor-card-header">
                                         <h4>{tutor.fullName}</h4>
+                                        {tutor.is_verified && (
+                                            <span className="verified-badge" title="Подтвержденный преподаватель">✅</span>
+                                        )}
                                         <span className="tutor-price">{tutor.price} руб./час</span>
                                     </div>
                                     <div className="tutor-card-body">
