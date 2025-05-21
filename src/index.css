@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "Revard";
+  src: url("../src/fonts/Revard.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "TaylorSans";
+  src: url("../src/fonts/TaylorSans-Regular.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 300;
+}
+
+body {
+  font-family: "TaylorSans", sans-serif;
+  background-color: #FAF3EB;
+  color: #201209;
+  margin: 10px 20px;
+}
+
+/*.container {*/
+/*  width: 100%;*/
+/*  margin: 0 auto;*/
+/*  !*padding: 0 20px;*!*/
+/*}*/
+
+/*code {*/
+/*  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',*/
+/*    monospace;*/
+/*}*/

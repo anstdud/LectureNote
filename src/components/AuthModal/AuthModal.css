@@ -1,0 +1,135 @@
+/* AuthModal.css */
+.auth-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(249, 218, 189, 0.95);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.auth-modal__container {
+    background: #FAF3EB;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.auth-modal__title {
+    color: #38303B;
+    font-family: "TaylorSans", sans-serif;
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.auth-modal__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.auth-modal__input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.auth-modal__label {
+    font-family: "TaylorSans", sans-serif;
+    color: #548B74;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.auth-modal__input {
+    padding: 0.8rem 1rem;
+    border: 2px solid #E3D5C9;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    background: #FFF;
+}
+
+.auth-modal__input:focus {
+    border-color: #548B74;
+    outline: none;
+}
+
+.auth-modal__select {
+    padding: 0.8rem 1rem;
+    border: 2px solid #E3D5C9;
+    border-radius: 8px;
+    background: #FFF;
+    cursor: pointer;
+    appearance: none;
+}
+
+.auth-modal__button {
+    background: #548B74;
+    color: white;
+    padding: 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.auth-modal__button:hover:not(:disabled) {
+    background: #467A63;
+    transform: translateY(-1px);
+}
+
+.auth-modal__button:disabled {
+    background: #D3D3D3;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.auth-modal__toggle-button {
+    background: transparent;
+    color: #548B74;
+    border: 2px solid #548B74;
+    padding: 0.8rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.auth-modal__toggle-button:hover:not(:disabled) {
+    background: #F0F7F4;
+}
+
+.auth-modal__error {
+    color: #E74C3C;
+    background: #FDE8E6;
+    padding: 0.8rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+    .auth-modal__container {
+        padding: 1.5rem;
+    }
+
+    .auth-modal__title {
+        font-size: 1.5rem;
+    }
+
+    .auth-modal__input {
+        font-size: 0.9rem;
+    }
+}

@@ -1,0 +1,61 @@
+.code-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.code-modal {
+    background: #FFFAF5;
+    padding: 25px;
+    border-radius: 15px;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.code-modal h3 {
+    color: #201209;
+    margin-bottom: 15px;
+    font-family: "TaylorSans", sans-serif;
+    font-weight: lighter;
+}
+
+.code-content {
+    font-size: 24px;
+    font-weight: lighter;
+    color: #548B74;
+    margin: 20px 0;
+    padding: 10px;
+    background: #FAF3EB;
+    border-radius: 8px;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.copy-button {
+    background: #548B74;
+    color: #FAF3EB;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 10px;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.close-button {
+    background: #FAF3EB;
+    color: #548B74;
+    border: 2px solid #548B74;
+    padding: 10px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    margin: 10px;
+    font-family: "TaylorSans", sans-serif;
+}
