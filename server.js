@@ -846,7 +846,10 @@ app.get('/api/tutor/verification-status', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Ошибка:', error);
         res.status(500).json({ error: 'Ошибка получения статуса' });
+<<<<<<< HEAD
         // проверка
+=======
+>>>>>>> bc0b23fd1bd98df247c85ff2a169e849fee2002a
     }
 });
 
