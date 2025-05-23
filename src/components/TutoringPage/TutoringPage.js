@@ -266,6 +266,10 @@ const TutoringPage = ({ userRole }) => {
             setAdditionalInfo(updatedProfile.additionalInfo || '');
             setAvailableDays(updatedProfile.availableDays || []);
             setAvailableTime(updatedProfile.availableTime || { start: '09:00', end: '18:00' });
+            setPosition(updatedProfile.position || '');
+            setEducation(updatedProfile.education || '');
+            setRank(updatedProfile.rank || '');
+            setCity(updatedProfile.city || '');
 
             showCustomAlert('Анкета успешно сохранена!');
         } catch (error) {

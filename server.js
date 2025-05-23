@@ -213,14 +213,18 @@ app.get('/api/tutoring', authenticate, async (req, res) => {
                     ORDER BY b.datetime DESC
                 `, [req.user.id]),
                 pool.query(`
-                    SELECT 
+                    SELECT
                         full_name AS "fullName",
                         subject,
                         price,
                         available_days AS "availableDays",
                         available_time AS "availableTime",
-                        COALESCE(additional_info, '') AS "additionalInfo"
-                    FROM tutors 
+                        COALESCE(additional_info, '') AS "additionalInfo",
+                        position,
+                        education,
+                        rank,
+                        city
+                    FROM tutors
                     WHERE user_id = $1
                 `, [req.user.id])
             ]);
