@@ -239,6 +239,12 @@
     font-family: "TaylorSans", sans-serif;
 }
 
+.booking-info {
+    margin: 3px 0;
+    font-size: 14px;
+    color: #201209;
+}
+
 .confirm-button {
     background: #548B74;
     color: #FAF3EB;

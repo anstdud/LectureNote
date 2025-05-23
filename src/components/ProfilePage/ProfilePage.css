@@ -44,7 +44,7 @@
 .profile-field::after {
     content: '';
     display: block;
-    width: 120px;
+    width: 250px;
     border-bottom: 1px solid #201209;
     position: absolute;
     bottom: 0;
@@ -108,7 +108,6 @@
 
 .empty-bio {
     color: #666;
-    font-style: italic;
 }
 
 .avatar-section {
@@ -131,7 +130,7 @@
     padding: 8px 20px;
     font-size: 14px;
     background-color: #548B74;
-    color: white;
+    color: #FAF3EB;
     border-radius: 25px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -202,22 +201,21 @@ profile-action-buttons {
     background-color: #e8c9a9;
 }
 
-.profile-edit-btn {
-    background-color: #548B74;
-    color: #FAF3EB;
-    padding: 12px 40px;
-}
-
 .profile-password-btn {
     background-color: #F9DABD;
     color: #201209;
     padding: 12px 40px;
 }
 
+.profile-edit-btn {
+    background-color: #548B74;
+    color: #FAF3EB;
+}
+
 .password-form {
     margin-top: 30px;
     padding-top: 30px;
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #FAF3EB;
     max-width: 500px;
     margin: 30px auto 0;
 }
@@ -241,13 +239,14 @@ profile-action-buttons {
 .verification-section {
     margin-top: 30px;
     padding: 20px;
-    background: #f5f5f5;
+    background: #FAF3EB;
     border-radius: 8px;
 }
 
 .verification-section h3 {
     color: #201209;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 .upload-label {
@@ -276,35 +275,69 @@ profile-action-buttons {
     margin-top: 15px;
 }
 
-.verification-status.approved {
-    background: #e8f5e9;
-    border: 1px solid #4caf50;
+.verification-status.pending {
+    background: #FAF3EB;
+    border: 1px solid #548B74;
+    text-align: center;
 }
 
-.verification-status.pending {
-    background: #fff3e0;
-    border: 1px solid #ffa726;
+.verification-status.pending a {
+    color: #548B74;
+    text-decoration: none;
 }
 
 .verification-status.rejected {
-    background: #ffebee;
+    background: #FAF3EB;
     border: 1px solid #ef5350;
 }
 
 .verification-details {
     margin-top: 10px;
     font-size: 0.9em;
-    color: #555;
+    color: #201209;
 }
 
 .retry-button {
     margin-top: 10px;
     padding: 8px 15px;
     background: #548B74;
-    color: white;
+    color: #FAF3EB;
     border: none;
     border-radius: 4px;
     cursor: pointer;
+}
+
+.verification-section {
+    text-align: center;
+}
+
+.verification-upload {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.upload-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 200px;
+    padding: 12px;
+    margin: 0 auto;
+}
+
+.verification-warning {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.verification-status {
+    text-align: center;
 }
 
 @media (max-width: 768px) {

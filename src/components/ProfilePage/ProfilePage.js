@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './ProfilePage.css';
+import { showCustomAlert } from '../Notifications/Notifications.js';
+import { useNavigate } from 'react-router-dom';
 
 const ProfilePage = () => {
     const [userData, setUserData] = useState({
@@ -13,7 +15,9 @@ const ProfilePage = () => {
         city: '',
         education: '',
         bio: '',
-        avatar_url: ''
+        avatar_url: '',
+        role: '',
+        tutorProfileComplete: false
     });
     const [editMode, setEditMode] = useState(false);
     const [passwordEditMode, setPasswordEditMode] = useState(false);
@@ -22,6 +26,7 @@ const ProfilePage = () => {
     const [verificationStatus, setVerificationStatus] = useState('not_submitted');
     const [documentUrl, setDocumentUrl] = useState('');
     const [verificationDetails, setVerificationDetails] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchVerificationStatus = async () => {
@@ -46,24 +51,34 @@ const ProfilePage = () => {
         const fetchUserData = async () => {
             const token = localStorage.getItem('token');
             try {
-                const response = await fetch('http://localhost:5001/api/user', {
-                    headers: { 'Authorization': `Bearer ${token}` },
-                });
+                const [userResponse, tutorResponse] = await Promise.all([
+                    fetch('http://localhost:5001/api/user', {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    }),
+                    fetch('http://localhost:5001/api/tutor', {
+                        headers: { 'Authorization': `Bearer ${token}` },
+                    })
+                ]);
 
-                if (!response.ok) throw new Error('Ошибка загрузки данных');
+                if (!userResponse.ok) throw new Error('Ошибка загрузки данных');
 
-                const data = await response.json();
+                const userData = await userResponse.json();
+                const tutorData = await tutorResponse.json().catch(() => null);
+
                 setUserData(prev => ({
-                    username: data.username || '',
-                    email: data.email || '',
-                    full_name: data.full_name || '',
-                    phone_number: data.phone_number || '',
-                    city: data.city || '',
-                    education: data.education || '',
-                    bio: data.bio || '',
-                    avatar_url: data.avatar_url || '',
-                    role: data.role,
+                    ...prev,
+                    username: userData.username || '',
+                    email: userData.email || '',
+                    full_name: userData.full_name || '',
+                    phone_number: userData.phone_number || '',
+                    city: userData.city || '',
+                    education: userData.education || '',
+                    bio: userData.bio || '',
+                    avatar_url: userData.avatar_url || '',
+                    role: userData.role,
+                    tutorProfileComplete: !!tutorData?.fullName
                 }));
+
                 setLoading(false);
             } catch (error) {
                 console.error('Ошибка:', error);
@@ -117,9 +132,9 @@ const ProfilePage = () => {
             }));
             localStorage.setItem('username', data.username);
             setEditMode(false);
-        } catch (error) {
+        }  catch (error) {
             console.error('Ошибка:', error);
-            alert('Ошибка при обновлении данных');
+            showCustomAlert('Ошибка при обновлении данных', true);
         }
     };
 
@@ -128,7 +143,7 @@ const ProfilePage = () => {
         const token = localStorage.getItem('token');
 
         if (userData.newPassword !== userData.confirmPassword) {
-            alert('Новый пароль и подтверждение пароля не совпадают');
+            showCustomAlert('Новый пароль и подтверждение пароля не совпадают', true);
             return;
         }
 
@@ -151,7 +166,7 @@ const ProfilePage = () => {
             setPasswordEditMode(false);
         } catch (error) {
             console.error('Ошибка:', error);
-            alert('Ошибка при изменении пароля');
+            showCustomAlert('Ошибка при изменении пароля', true);
         }
     };
 
@@ -180,7 +195,7 @@ const ProfilePage = () => {
             }));
         } catch (error) {
             console.error('Ошибка:', error);
-            alert('Не удалось загрузить аватар');
+            showCustomAlert('Не удалось загрузить аватар');
         }
     };
 
@@ -188,26 +203,28 @@ const ProfilePage = () => {
         const file = e.target.files[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('document', file);
-
         try {
+            const formData = new FormData();
+            formData.append('document', file);
+
             const response = await fetch('http://localhost:5001/api/tutor/upload-document', {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: formData
             });
-            if (!response.ok) throw new Error('Ошибка загрузки документа');
 
-            const data = await response.json();
+            if (!response.ok) throw new Error('Ошибка загрузки');
+
             setVerificationStatus('pending');
-            setDocumentUrl(data.documentUrl);
+            showCustomAlert('Документ успешно загружен!');
+
         } catch (error) {
             console.error('Ошибка:', error);
-            alert(error.message);
+            showCustomAlert(error.message, true);
         }
     };
-
 
     if (loading) {
         return <div className="profile-loading">Загрузка...</div>;
@@ -438,57 +455,73 @@ const ProfilePage = () => {
                     <div className="verification-section">
                         <h3>Подтверждение квалификации</h3>
 
-                        {verificationStatus === 'not_submitted' && (
-                            <div className="verification-upload">
-                                <input
-                                    type="file"
-                                    id="document-upload"
-                                    onChange={handleDocumentUpload}
-                                    accept="application/pdf,image/*"
-                                    style={{ display: 'none' }}
-                                />
-                                <label htmlFor="document-upload" className="upload-label">
-                                    Загрузить документ
-                                </label>
-                                <p className="upload-hint">Поддерживаемые форматы: PDF, JPG, PNG</p>
-                            </div>
-                        )}
-
-                        {verificationStatus === 'pending' && (
-                            <div className="verification-status pending">
-                                <p>⏳ Документ на проверке</p>
-                                {documentUrl && (
-                                    <a href={documentUrl} target="_blank" rel="noopener noreferrer">
-                                        Просмотреть загруженный документ
-                                    </a>
-                                )}
-                            </div>
-                        )}
-
-                        {verificationStatus === 'approved' && (
-                            <div className="verification-status approved">
-                                <p>✅ Квалификация подтверждена</p>
-                                {verificationDetails && (
-                                    <div className="verification-details">
-                                        <p>Проверено: {new Date(verificationDetails.updated_at).toLocaleDateString()}</p>
-                                        {verificationDetails.verified_by && (
-                                            <p>Администратор: {verificationDetails.verified_by}</p>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {verificationStatus === 'rejected' && (
-                            <div className="verification-status rejected">
-                                <p>❌ Документ отклонен</p>
+                        {!userData.tutorProfileComplete && (
+                            <div className="verification-warning">
+                                <p>⚠️ Для загрузки документа необходимо сначала заполнить профиль преподавателя</p>
                                 <button
-                                    className="retry-button"
-                                    onClick={() => document.getElementById('document-upload').click()}
+                                    className="profile-edit-btn"
+                                    onClick={() => navigate('/tutoring')}
                                 >
-                                    Загрузить новый документ
+                                    Заполнить профиль
                                 </button>
                             </div>
+                        )}
+
+                        {userData.tutorProfileComplete && (
+                            <>
+                            {verificationStatus === 'not_submitted' && (
+                                <div className="verification-upload">
+                                    <input
+                                        type="file"
+                                        id="document-upload"
+                                        onChange={handleDocumentUpload}
+                                        accept="application/pdf,image/*"
+                                        style={{ display: 'none' }}
+                                    />
+                                    <label htmlFor="document-upload" className="upload-label">
+                                        Загрузить документ
+                                    </label>
+                                    <p className="upload-hint">Поддерживаемые форматы: PDF, JPG, PNG</p>
+                                </div>
+                            )}
+
+                            {verificationStatus === 'pending' && (
+                                <div className="verification-status pending">
+                                    <p>⏳ Документ на проверке</p>
+                                    {documentUrl && (
+                                        <a href={documentUrl} target="_blank" rel="noopener noreferrer">
+                                            Просмотреть загруженный документ
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+
+                            {verificationStatus === 'approved' && (
+                                <div className="verification-status approved">
+                                    <p>✅ Квалификация подтверждена</p>
+                                    {verificationDetails && (
+                                        <div className="verification-details">
+                                            <p>Проверено: {new Date(verificationDetails.updated_at).toLocaleDateString()}</p>
+                                            {verificationDetails.verified_by && (
+                                                <p>Администратор: {verificationDetails.verified_by}</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
+                            {verificationStatus === 'rejected' && (
+                                <div className="verification-status rejected">
+                                    <p>❌ Документ отклонен</p>
+                                    <button
+                                        className="retry-button"
+                                        onClick={() => document.getElementById('document-upload').click()}
+                                    >
+                                        Загрузить новый документ
+                                    </button>
+                                </div>
+                            )}
+                            </>
                         )}
                     </div>
                 )}

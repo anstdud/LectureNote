@@ -201,10 +201,11 @@ app.get('/api/tutoring', authenticate, async (req, res) => {
             const [bookings, tutorData] = await Promise.all([
                 pool.query(`
                     SELECT 
-                        b.id, 
-                        u.username, 
+                        b.id,
+                        u.full_name AS "studentName", 
                         b.datetime,
-                        t.subject
+                        t.subject,
+                        u.phone_number AS "studentPhone"
                     FROM bookings b
                     JOIN users u ON b.student_id = u.id
                     JOIN tutors t ON b.tutor_id = t.user_id
@@ -299,10 +300,14 @@ app.post('/api/tutor', authenticate, [
     body('price').isNumeric(),
     body('availableDays').isArray(),
     body('availableTime').isObject(),
-    body('additionalInfo').optional().trim().escape()
+    body('additionalInfo').optional().trim().escape(),
+    body('position').optional().trim().escape(),
+    body('education').optional().trim().escape(),
+    body('rank').optional().trim().escape(),
+    body('city').optional().trim().escape()
 ], async (req, res) => {
     console.log('Received tutor data:', req.body);
-    const { fullName, subject, price, availableDays, availableTime, additionalInfo = '' } = req.body; // Устанавливаем значение по умолчанию
+    const { fullName, subject, price, availableDays, availableTime, additionalInfo = '', position, education, rank, city } = req.body;
 
     try {
         const existing = await pool.query(
@@ -312,21 +317,28 @@ app.post('/api/tutor', authenticate, [
 
         if (existing.rows.length > 0) {
             await pool.query(
-                `UPDATE tutors 
-                 SET full_name = $1, 
-                     subject = $2, 
-                     price = $3, 
-                     available_days = $4, 
+                `UPDATE tutors
+                 SET full_name = $1,
+                     subject = $2,
+                     price = $3,
+                     available_days = $4,
                      available_time = $5,
-                     additional_info = $6
-                 WHERE user_id = $7`,
-                [fullName, subject, price, availableDays, availableTime, additionalInfo, req.user.id]
+                     additional_info = $6,
+                     position = $7,
+                     education = $8,
+                     rank = $9,
+                     city = $10
+                 WHERE user_id = $11`,
+                [fullName, subject, price, availableDays, availableTime, additionalInfo, position, education, rank, city, req.user.id]
             );
         } else {
             await pool.query(
-                `INSERT INTO tutors (user_id, full_name, subject, price, available_days, available_time, additional_info)
-                 VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-                [req.user.id, fullName, subject, price, availableDays, availableTime, additionalInfo]
+                `INSERT INTO tutors (
+                    user_id, full_name, subject, price, available_days,
+                    available_time, additional_info, position, education,
+                    rank, city
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`,
+                [req.user.id, fullName, subject, price, availableDays, availableTime, additionalInfo, position, education, rank, city]
             );
         }
 
@@ -337,7 +349,11 @@ app.post('/api/tutor', authenticate, [
                 price,
                 available_days AS "availableDays",
                 available_time AS "availableTime",
-                additional_info AS "additionalInfo"
+                additional_info AS "additionalInfo",
+                position,
+                education,
+                rank,
+                city
             FROM tutors 
             WHERE user_id = $1
         `, [req.user.id]);
@@ -386,7 +402,11 @@ app.get('/api/tutors', authenticate, async (req, res) => {
                 t.available_days AS "availableDays",
                 t.available_time->>'start' as start_time,
                 t.available_time->>'end' as end_time,
-                t.additional_info AS "additionalInfo"
+                t.additional_info AS "additionalInfo",
+                t.position,
+                t.education,
+                t.rank,
+                t.city
             FROM tutors t
                 JOIN users u ON t.user_id = u.id
         `);
@@ -793,38 +813,81 @@ app.post('/api/upload-avatar', authenticate, upload.single('avatar'), async (req
     }
 });
 
+const documentsDir = 'uploads/documents/';
+if (!existsSync(documentsDir)) {
+    mkdirSync(documentsDir, { recursive: true });
+}
+
 const documentStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'uploads/documents/');
+        cb(null, documentsDir);
     },
     filename: (req, file, cb) => {
         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
         cb(null, uniqueSuffix + '-' + file.originalname);
     }
 });
-const uploadDocument = multer({ storage: documentStorage });
+
+const uploadDocument = multer({
+    storage: documentStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024 // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/pdf' ||
+            file.mimetype === 'image/jpeg' ||
+            file.mimetype === 'image/png') {
+            cb(null, true);
+        } else {
+            cb(new Error('Неподдерживаемый формат файла'), false);
+        }
+    }
+});
+
+app.use((err, req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        return res.status(400).json({ error: err.message });
+    }
+    next(err);
+});
+// const uploadDocument = multer({ storage: documentStorage });
 
 app.post('/api/tutor/upload-document', authenticate, uploadDocument.single('document'), async (req, res) => {
     if (req.user.role !== 'teacher') {
         return res.status(403).json({ error: 'Доступ запрещен' });
     }
+
     try {
         const tutor = await pool.query('SELECT id FROM tutors WHERE user_id = $1', [req.user.id]);
-        if (!tutor.rows.length) return res.status(400).json({ error: 'Сначала создайте профиль преподавателя' });
-
-        const documentUrl = `${req.protocol}://${req.get('host')}/uploads/documents/${req.file.filename}`;
-
-        await pool.query('DELETE FROM tutor_verifications WHERE user_id = $1 AND status = $2',
-            [req.user.id, 'pending']);
+        if (tutor.rows.length === 0) {
+            return res.status(400).json({
+                error: 'Сначала заполните профиль преподавателя'
+            });
+        }
 
         await pool.query(
-            'INSERT INTO tutor_verifications (user_id, document_url) VALUES ($1, $2)',
+            'DELETE FROM tutor_verifications WHERE user_id = $1 AND status = $2',
+            [req.user.id, 'pending']
+        );
+
+        const documentUrl = `/uploads/documents/${req.file.filename}`;
+
+        await pool.query(
+            'INSERT INTO tutor_verifications (user_id, document_url) VALUES ($1, $2) RETURNING *',
             [req.user.id, documentUrl]
         );
-        res.json({ message: 'Документ отправлен на проверку', documentUrl });
+
+        res.json({
+            message: 'Документ отправлен на проверку',
+            documentUrl
+        });
+
     } catch (error) {
-        console.error('Ошибка:', error);
-        res.status(500).json({ error: 'Ошибка загрузки документа' });
+        console.error('Ошибка загрузки документа:', error);
+        res.status(500).json({
+            error: 'Ошибка сервера при загрузке документа',
+            details: error.message
+        });
     }
 });
 
@@ -846,10 +909,6 @@ app.get('/api/tutor/verification-status', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Ошибка:', error);
         res.status(500).json({ error: 'Ошибка получения статуса' });
-<<<<<<< HEAD
-        // проверка
-=======
->>>>>>> bc0b23fd1bd98df247c85ff2a169e849fee2002a
     }
 });
 

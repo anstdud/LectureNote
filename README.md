@@ -76,16 +76,21 @@ CREATE TABLE shared_lectures (
     user_id INT REFERENCES users(id),
     created_at TIMESTAMP DEFAULT NOW()
 );
+  
 CREATE TABLE tutors (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) UNIQUE,
-  full_name VARCHAR(255),
-  subject VARCHAR(100),
-  price NUMERIC,
-  available_days VARCHAR(3)[],
-  available_time JSONB,
-  additional_info VARCHAR(300),
-  is_verified BOOLEAN DEFAULT FALSE
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    full_name TEXT NOT NULL,
+    subject TEXT NOT NULL,
+    price NUMERIC NOT NULL,
+    available_days TEXT[] NOT NULL,
+    available_time JSONB NOT NULL,
+    additional_info TEXT,
+    position TEXT,
+    education TEXT,
+    rank TEXT,
+    city TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
   
 CREATE TABLE bookings (

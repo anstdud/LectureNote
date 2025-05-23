@@ -27,6 +27,10 @@ const TutoringPage = ({ userRole }) => {
     const daysOrder = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
     const russianShortWeekdays = ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'];
     const [occupiedTimes, setOccupiedTimes] = useState([]);
+    const [position, setPosition] = useState('');
+    const [education, setEducation] = useState('');
+    const [rank, setRank] = useState('');
+    const [city, setCity] = useState('');
 
     const fetchOccupied = useCallback(async () => {
         try {
@@ -165,6 +169,10 @@ const TutoringPage = ({ userRole }) => {
                         start: '09:00',
                         end: '18:00'
                     });
+                    setPosition(data.tutorData.position || '');
+                    setEducation(data.tutorData.education || '');
+                    setRank(data.tutorData.rank || '');
+                    setCity(data.tutorData.city || '');
                 } else {
                     console.log('Профиль преподавателя не найден');
                     setIsProfileCreated(false);
@@ -174,6 +182,10 @@ const TutoringPage = ({ userRole }) => {
                     setAdditionalInfo('');
                     setAvailableDays([]);
                     setAvailableTime({ start: '09:00', end: '18:00' });
+                    setPosition('');
+                    setEducation('');
+                    setRank('');
+                    setCity('');
                 }
             }
         } catch (error) {
@@ -213,7 +225,11 @@ const TutoringPage = ({ userRole }) => {
                 price: Number(price),
                 availableDays,
                 availableTime,
-                additionalInfo: additionalInfo || ''
+                additionalInfo: additionalInfo || '',
+                position,
+                education,
+                rank,
+                city
             };
 
             console.log('Отправляемые данные:', bodyData);
@@ -499,6 +515,26 @@ const TutoringPage = ({ userRole }) => {
                                         <p className="tutor-time">
                                             <strong>Время:</strong> {tutor.availableTime.start} - {tutor.availableTime.end}
                                         </p>
+                                        {tutor.position && (
+                                            <p className="tutor-info">
+                                                <strong>Должность:</strong> {tutor.position}
+                                            </p>
+                                        )}
+                                        {tutor.education && (
+                                            <p className="tutor-info">
+                                                <strong>Образование:</strong> {tutor.education}
+                                            </p>
+                                        )}
+                                        {tutor.rank && (
+                                            <p className="tutor-info">
+                                                <strong>Звание:</strong> {tutor.rank}
+                                            </p>
+                                        )}
+                                        {tutor.city && (
+                                            <p className="tutor-info">
+                                                <strong>Город:</strong> {tutor.city}
+                                            </p>
+                                        )}
                                         {tutor.additionalInfo && (
                                             <div className="tutor-additional-info">
                                                 <strong>Дополнительно:</strong> {tutor.additionalInfo}
@@ -662,6 +698,23 @@ const TutoringPage = ({ userRole }) => {
                                         <span className="profile-info-label">Цена за час</span>
                                         <span className="profile-info-value">{price} руб.</span>
                                     </div>
+
+                                    <div className="profile-info-item">
+                                        <span className="profile-info-label">Должность</span>
+                                        <span className="profile-info-value">{position}</span>
+                                    </div>
+                                    <div className="profile-info-item">
+                                        <span className="profile-info-label">Образование</span>
+                                        <span className="profile-info-value">{education}</span>
+                                    </div>
+                                    <div className="profile-info-item">
+                                        <span className="profile-info-label">Звание</span>
+                                        <span className="profile-info-value">{rank}</span>
+                                    </div>
+                                    <div className="profile-info-item">
+                                        <span className="profile-info-label">Город</span>
+                                        <span className="profile-info-value">{city}</span>
+                                    </div>
                                 </div>
 
                                 {additionalInfo && additionalInfo.trim() !== '' && (
@@ -734,11 +787,46 @@ const TutoringPage = ({ userRole }) => {
                                     </div>
 
                                     <div className="form-group">
+                                        <label>Должность</label>
+                                        <input
+                                            value={position}
+                                            onChange={(e) => setPosition(e.target.value)}
+                                            placeholder="Профессор, доцент и т.д."
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Образование</label>
+                                        <input
+                                            value={education}
+                                            onChange={(e) => setEducation(e.target.value)}
+                                            placeholder="Высшее образование, ученая степень"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Звание</label>
+                                        <input
+                                            value={rank}
+                                            onChange={(e) => setRank(e.target.value)}
+                                            placeholder="Кандидат наук, доктор наук"
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
                                         <label>Дополнительная информация</label>
                                         <textarea
                                             value={additionalInfo}
                                             onChange={(e) => setAdditionalInfo(e.target.value)}
                                             placeholder="Опыт работы, методика преподавания, образование..."
+                                        />
+                                    </div>
+
+                                    <div className="form-group">
+                                        <label>Город</label>
+                                        <input
+                                            value={city}
+                                            onChange={(e) => setCity(e.target.value)}
                                         />
                                     </div>
 
@@ -872,12 +960,14 @@ const TutoringPage = ({ userRole }) => {
                                             .map(booking => (
                                                 <div key={booking.id} className="booking-item">
                                                     <div className="booking-details">
-                                                        <p className="booking-student">
-                                                            <strong>Студент:</strong> {booking.username}
+                                                        <p className="booking-info">
+                                                            <strong>Студент:</strong> {booking.studentName} {/* Изменено с username */}
                                                         </p>
-                                                        <p className="booking-time">
-                                                            <strong>Дата и
-                                                                время:</strong> {new Date(booking.datetime).toLocaleString('ru-RU', {
+                                                        <p className="booking-info">
+                                                            <strong>Телефон:</strong> {booking.studentPhone || 'не указан'}
+                                                        </p>
+                                                        <p className="booking-info">
+                                                            <strong>Дата и время:</strong> {new Date(booking.datetime).toLocaleString('ru-RU', {
                                                             day: 'numeric',
                                                             month: 'numeric',
                                                             year: 'numeric',
