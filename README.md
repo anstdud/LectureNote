@@ -79,7 +79,7 @@ CREATE TABLE shared_lectures (
   
 CREATE TABLE tutors (
     id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users(id),  
     full_name TEXT NOT NULL,
     subject TEXT NOT NULL,
     price NUMERIC NOT NULL,
@@ -96,7 +96,7 @@ CREATE TABLE tutors (
 CREATE TABLE bookings (
     id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES users(id),
-    tutor_id INTEGER REFERENCES users(id),
+    tutor_id INTEGER REFERENCES tutors(id),
     datetime TIMESTAMP NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -109,6 +109,15 @@ CREATE TABLE bookings (
     verified_by INTEGER REFERENCES users(id),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
+);
+  
+  CREATE TABLE ratings (
+    id SERIAL PRIMARY KEY,
+    tutor_id INTEGER NOT NULL REFERENCES tutors(id), 
+    student_id INTEGER NOT NULL REFERENCES users(id),
+    rating INTEGER NOT NULL CHECK (rating BETWEEN 1 AND 5),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (tutor_id, student_id)
 );
     ALTER TABLE users ADD COLUMN role VARCHAR(20) NOT NULL DEFAULT 'student';
 ```

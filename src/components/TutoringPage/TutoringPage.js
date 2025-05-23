@@ -325,8 +325,10 @@ const TutoringPage = ({ userRole }) => {
                 throw new Error('Время не выбрано');
             }
 
-            const selectedDate = calendarDate.toLocaleDateString('en-CA');
-            const datetime = `${selectedDate}T${selectedDateTime}:00`;
+            const year = calendarDate.getFullYear();
+            const month = String(calendarDate.getMonth() + 1).padStart(2, '0');
+            const day = String(calendarDate.getDate()).padStart(2, '0');
+            const datetime = `${year}-${month}-${day}T${selectedDateTime}:00`;
 
             if (!isTimeSlotAvailable(selectedDateTime)) {
                 throw new Error('Это время уже занято');
@@ -462,7 +464,64 @@ const TutoringPage = ({ userRole }) => {
         return slots;
     };
 
+    const StarRating = ({ rating, onRate, editable = false }) => {
+        const [hoverRating, setHoverRating] = useState(0);
 
+        return (
+            <div className="star-rating">
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                        key={star}
+                        className={`star ${(hoverRating || rating) >= star ? 'active' : ''} 
+                           ${editable ? 'editable' : ''}`}
+                        onClick={() => editable && onRate(star)}
+                        onMouseEnter={() => editable && setHoverRating(star)}
+                        onMouseLeave={() => editable && setHoverRating(0)}
+                        disabled={!editable}
+                    >
+                        ★
+                    </button>
+                ))}
+            </div>
+        );
+    };
+
+    const handleRateTutor = async (tutorId, rating) => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:5001/api/rate-tutor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ tutorId, rating })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Ошибка при сохранении оценки');
+            }
+
+            setTutors(prevTutors => prevTutors.map(tutor => {
+                if (tutor.id === tutorId) {
+                    return {
+                        ...tutor,
+                        rating: data.averageRating,
+                        total_ratings: data.totalRatings,
+                        userRating: rating
+                    };
+                }
+                return tutor;
+            }));
+
+            showCustomAlert('Оценка сохранена!');
+        } catch (error) {
+            console.error('Ошибка оценки:', error);
+            showCustomAlert(error.message, true);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -510,6 +569,7 @@ const TutoringPage = ({ userRole }) => {
                                         )}
                                         <span className="tutor-price">{tutor.price} руб./час</span>
                                     </div>
+
                                     <div className="tutor-card-body">
                                         <p className="tutor-subject"><strong>Предмет:</strong> {tutor.subject}</p>
                                         <p className="tutor-availability">
@@ -545,6 +605,25 @@ const TutoringPage = ({ userRole }) => {
                                             </div>
                                         )}
                                     </div>
+
+                                    <div className="tutor-rating-section">
+                                        <div className="rating-row">
+                                            <span>Рейтинг:</span>
+                                            <StarRating rating={tutor.rating} />
+                                            <span>({tutor.total_ratings})</span>
+                                        </div>
+                                        {userRole === 'student' && tutor.hasPastLessons && (
+                                            <div className="rating-row">
+                                                <span>Ваша оценка:</span>
+                                                <StarRating
+                                                    rating={tutor.userRating || 0}
+                                                    editable={true}
+                                                    onRate={(rating) => handleRateTutor(tutor.id, rating)}
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
+
                                     <button
                                         className="schedule-button"
                                         onClick={() => setSelectedTutor(tutor)}

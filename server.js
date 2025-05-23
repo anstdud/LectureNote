@@ -184,36 +184,27 @@ app.use((req, res, next) => {
 
 app.get('/api/tutoring', authenticate, async (req, res) => {
     try {
-        if (req.user.role === 'student') {
-            const result = await pool.query(`
-                SELECT 
-                    u.id, 
-                    t.full_name AS "fullName", 
-                    t.subject, 
-                    t.price,
-                    t.available_days AS "availableDays",
-                    t.available_time AS "availableTime"
-                FROM tutors t
-                JOIN users u ON t.user_id = u.id
-            `);
-            res.json(result.rows);
-        } else if (req.user.role === 'teacher') {
+        if (req.user.role === 'teacher') {
             const [bookings, tutorData] = await Promise.all([
-                pool.query(`
-                    SELECT 
-                        b.id,
-                        u.full_name AS "studentName", 
-                        b.datetime,
-                        t.subject,
-                        u.phone_number AS "studentPhone"
-                    FROM bookings b
-                    JOIN users u ON b.student_id = u.id
-                    JOIN tutors t ON b.tutor_id = t.user_id
-                    WHERE b.tutor_id = $1
-                    ORDER BY b.datetime DESC
-                `, [req.user.id]),
-                pool.query(`
-                    SELECT
+                pool.query(
+                    `SELECT
+                         b.id,
+                         u.full_name AS "studentName",
+                         u.avatar_url AS "studentAvatar",
+                         b.datetime,
+                         t.subject,
+                         u.phone_number AS "studentPhone",
+                         u.email AS "studentEmail"
+                     FROM bookings b
+                              JOIN users u ON b.student_id = u.id
+                              JOIN tutors t ON b.tutor_id = t.id
+                     WHERE t.user_id = $1
+                       AND b.datetime >= NOW()
+                     ORDER BY b.datetime DESC`,
+                    [req.user.id]
+                ),
+                pool.query(
+                    `SELECT
                         full_name AS "fullName",
                         subject,
                         price,
@@ -224,9 +215,10 @@ app.get('/api/tutoring', authenticate, async (req, res) => {
                         education,
                         rank,
                         city
-                    FROM tutors
-                    WHERE user_id = $1
-                `, [req.user.id])
+                     FROM tutors
+                     WHERE user_id = $1`,
+                    [req.user.id]
+                )
             ]);
 
             res.json({
@@ -257,7 +249,7 @@ app.post('/api/tutoring', authenticate, [
         const { tutorId, datetime } = req.body;
 
         const tutorExists = await pool.query(
-            'SELECT id FROM tutors WHERE user_id = $1',
+            'SELECT id, user_id FROM tutors WHERE id = $1',
             [tutorId]
         );
 
@@ -265,9 +257,11 @@ app.post('/api/tutoring', authenticate, [
             return res.status(404).json({ error: 'Преподаватель не найден' });
         }
 
+        const tutorUserId = tutorExists.rows[0].user_id;
+
         const timeBooked = await pool.query(
-            'SELECT id FROM bookings WHERE datetime = $1',
-            [datetime]
+            'SELECT id FROM bookings WHERE datetime = $1 AND tutor_id = $2',
+            [datetime, tutorId]
         );
 
         if (timeBooked.rows.length > 0) {
@@ -370,10 +364,6 @@ app.post('/api/tutor', authenticate, [
 });
 
 app.get('/api/tutor', authenticate, async (req, res) => {
-    if (req.user.role !== 'teacher') {
-        return res.status(403).json({ error: 'Доступ запрещен' });
-    }
-
     try {
         const result = await pool.query(`
             SELECT 
@@ -399,21 +389,33 @@ app.get('/api/tutors', authenticate, async (req, res) => {
     try {
         const result = await pool.query(`
             SELECT
-                u.id,
+                t.id,
+                t.id as "tutorId",
                 t.full_name AS "fullName",
                 t.subject,
                 t.price,
+                COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) AS rating,
+                COUNT(r.rating) as total_ratings,
+                (
+                    SELECT rating
+                    FROM ratings
+                    WHERE tutor_id = t.id
+                      AND student_id = $1
+                    LIMIT 1
+                ) AS "userRating",
                 t.available_days AS "availableDays",
-                t.available_time->>'start' as start_time,
-                t.available_time->>'end' as end_time,
+                t.available_time->>'start' AS start_time,
+                t.available_time->>'end' AS end_time,
                 t.additional_info AS "additionalInfo",
                 t.position,
                 t.education,
                 t.rank,
                 t.city
             FROM tutors t
-                JOIN users u ON t.user_id = u.id
-        `);
+                LEFT JOIN ratings r ON t.id = r.tutor_id
+            GROUP BY t.id, t.user_id
+            ORDER BY rating DESC
+        `, [req.user.id]);
 
         const tutors = result.rows.map(tutor => ({
             ...tutor,
@@ -468,21 +470,25 @@ app.delete('/api/tutor', authenticate, async (req, res) => {
 app.get('/api/student/bookings', authenticate, async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT 
-                b.id, 
-                t.full_name AS "tutorName", 
-                t.subject, 
-                b.datetime
+            `SELECT
+                 b.id,
+                 t.full_name AS "tutorName",
+                 t.subject,
+                 b.datetime,
+                 u.avatar_url AS "tutorAvatar",
+                 t.price
              FROM bookings b
-             JOIN tutors t ON b.tutor_id = t.user_id
+                      JOIN tutors t ON b.tutor_id = t.id
+                      JOIN users u ON t.user_id = u.id
              WHERE b.student_id = $1
+               AND b.datetime >= NOW()
              ORDER BY b.datetime ASC`,
             [req.user.id]
         );
         res.json(result.rows);
     } catch (err) {
-        console.error('Ошибка получения бронирований студента:', err);
-        res.status(500).json({ error: 'Ошибка получения бронирований' });
+        console.error('Ошибка получения бронирований:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
     }
 });
 
@@ -913,6 +919,67 @@ app.get('/api/tutor/verification-status', authenticate, async (req, res) => {
     } catch (error) {
         console.error('Ошибка:', error);
         res.status(500).json({ error: 'Ошибка получения статуса' });
+    }
+});
+
+app.get('/api/tutors/:id/rating', async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT 
+                ROUND(AVG(rating), 1) as average_rating,
+                COUNT(*) as total_ratings
+            FROM ratings 
+            WHERE tutor_id = $1
+        `, [req.params.id]);
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: 'Ошибка получения рейтинга' });
+    }
+});
+
+app.post('/api/rate-tutor', authenticate, [
+    body('tutorId').isInt(),
+    body('rating').isInt({ min: 1, max: 5 })
+], async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+    try {
+        const { tutorId, rating } = req.body;
+
+        const tutorExists = await pool.query(
+            'SELECT id FROM tutors WHERE id = $1',
+            [tutorId]
+        );
+
+        if (tutorExists.rows.length === 0) {
+            return res.status(404).json({ error: 'Преподаватель не найден' });
+        }
+
+        await pool.query(`
+            INSERT INTO ratings (tutor_id, student_id, rating)
+            VALUES ($1, $2, $3)
+                ON CONFLICT (tutor_id, student_id) 
+            DO UPDATE SET rating = EXCLUDED.rating
+        `, [tutorId, req.user.id, rating]);
+
+        const result = await pool.query(`
+            SELECT
+                ROUND(AVG(rating)::numeric, 1) as average_rating,
+                COUNT(*) as total_ratings
+            FROM ratings
+            WHERE tutor_id = $1
+        `, [tutorId]);
+
+        res.json({
+            message: 'Оценка сохранена',
+            averageRating: result.rows[0].average_rating,
+            totalRatings: result.rows[0].total_ratings
+        });
+    } catch (err) {
+        console.error('Ошибка сохранения оценки:', err);
+        res.status(500).json({ error: 'Ошибка сохранения оценки' });
     }
 });
 
