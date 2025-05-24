@@ -1,0 +1,80 @@
+.admin-container {
+    max-width: 1200px;
+    margin: 30px auto;
+    padding: 20px;
+    font-family: "TaylorSans", sans-serif;
+}
+
+.requests-list {
+    margin-top: 20px;
+    display: grid;
+    gap: 20px;
+}
+
+.request-card {
+    background: #FFF4E9;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.admin-container h2 {
+    color: #201209;
+    text-align: center;
+}
+
+.request-info h3 {
+    margin: 0 0 10px 0;
+    color: #201209;
+}
+
+.document-link {
+    display: inline-block;
+    margin-top: 10px;
+    color: #548B74;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.document-link:hover {
+    text-decoration: underline;
+}
+
+.request-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.approve-btn, .reject-btn {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: "TaylorSans", sans-serif;
+    transition: transform 0.2s;
+}
+
+.approve-btn {
+    background: #548B74;
+    color: #FAF3EB;
+}
+
+.reject-btn {
+    background: rgba(56, 48, 59, 0.8);
+    color: #FAF3EB;
+}
+
+.approve-btn:hover, .reject-btn:hover {
+    transform: translateY(-2px);
+}
+
+.no-requests {
+    text-align: center;
+    padding: 40px;
+    color: #FAF3EB;
+    font-size: 18px;
+}

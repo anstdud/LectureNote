@@ -410,7 +410,13 @@ app.get('/api/tutors', authenticate, async (req, res) => {
                 t.position,
                 t.education,
                 t.rank,
-                t.city
+                t.city,
+                EXISTS(
+                    SELECT 1 
+                    FROM tutor_verifications 
+                    WHERE user_id = t.user_id 
+                    AND status = 'approved'
+                ) as "is_verified"
             FROM tutors t
                 LEFT JOIN ratings r ON t.id = r.tutor_id
             GROUP BY t.id, t.user_id
@@ -527,8 +533,11 @@ app.delete('/api/bookings/:id', authenticate, async (req, res) => {
 });
 
 app.get('/api/lectures', authenticate, async (req, res) => {
-    const userId = req.user.id;
+    if (req.user.role === 'admin') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
 
+    const userId = req.user.id;
     try {
         const result = await pool.query(
             'SELECT * FROM notes WHERE user_id = $1 ORDER BY created_at DESC',
@@ -537,7 +546,7 @@ app.get('/api/lectures', authenticate, async (req, res) => {
         res.json(result.rows);
     } catch (err) {
         console.error('Ошибка при получении лекций:', err);
-        res.status(500).json({ error: 'Ошибка при получении лекций' });
+        res.status(500).json([]);
     }
 });
 
@@ -545,6 +554,10 @@ app.post('/api/lectures', authenticate, [
     body('title').trim().escape(),
     body('text').trim().escape(),
 ], async (req, res) => {
+    if (req.user.role === 'admin') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ errors: errors.array() });
@@ -704,7 +717,7 @@ app.post('/api/lectures/add-by-code', authenticate, async (req, res) => {
 app.get('/api/user', authenticate, async (req, res) => {
     try {
         const result = await pool.query(
-            'SELECT username, email, full_name, phone_number, city, education, bio, avatar_url, role  FROM users WHERE id = $1',
+            'SELECT username, email, full_name, phone_number, city, education, bio, avatar_url, role FROM users WHERE id = $1',
             [req.user.id]
         );
 
@@ -720,8 +733,6 @@ app.get('/api/user', authenticate, async (req, res) => {
 });
 
 app.put('/api/user', authenticate, [
-    // body('username').isLength({ min: 3 }).trim().escape(),
-    // body('email').isEmail().normalizeEmail(),
     body('full_name').optional().trim().escape(),
     body('phone_number').optional().trim().escape(),
     body('city').optional().trim().escape(),
@@ -980,6 +991,70 @@ app.post('/api/rate-tutor', authenticate, [
     } catch (err) {
         console.error('Ошибка сохранения оценки:', err);
         res.status(500).json({ error: 'Ошибка сохранения оценки' });
+    }
+});
+
+app.get('/api/admin/verification-requests', authenticate, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    try {
+        const result = await pool.query(`
+            SELECT 
+                tv.id,
+                u.username,
+                u.email,
+                tv.document_url,
+                tv.created_at,
+                t.full_name,
+                t.subject
+            FROM tutor_verifications tv
+            JOIN users u ON tv.user_id = u.id
+            JOIN tutors t ON tv.user_id = t.user_id
+            WHERE tv.status = 'pending'
+        `);
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
+    }
+});
+
+app.put('/api/admin/verify-teacher', authenticate, [
+    body('requestId').isInt(),
+    body('status').isIn(['approved', 'rejected'])
+], async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ error: 'Доступ запрещен' });
+    }
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { requestId, status } = req.body;
+
+    try {
+        const result = await pool.query(`
+            UPDATE tutor_verifications
+            SET 
+                status = $1,
+                verified_by = $2,
+                updated_at = NOW()
+            WHERE id = $3
+            RETURNING *
+        `, [status, req.user.id, requestId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Запрос не найден' });
+        }
+
+        res.json({ message: 'Статус обновлен' });
+    } catch (err) {
+        console.error('Ошибка:', err);
+        res.status(500).json({ error: 'Ошибка сервера' });
     }
 });
 

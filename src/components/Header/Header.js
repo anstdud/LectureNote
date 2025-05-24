@@ -121,7 +121,7 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
                     <img className="navbar-logo__img" src={Logo} alt="Логотип" />
                     <Link to="/" className="navbar-logo__a">LectureNote</Link>
                 </div>
-                {isAuthenticated && (
+                {isAuthenticated && userRole !== 'admin' && (
                     <div className="navbar-buttons">
                         <div className="search-container">
                             <button
@@ -222,6 +222,46 @@ const Header = ({ isAuthenticated, setIsAuthenticated, onSearch, onAddByCode, is
                                 </li>
                                 <li>
                                     <Link to="/tutoring" className="tutoring-link">Репетиторство</Link>
+                                </li>
+                                <li>
+                                    <button onClick={handleLogout}>Выйти</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                )}
+
+                {isAuthenticated && userRole === 'admin' && (
+                    <div className="navbar-buttons">
+                        <div className="navbar-menu">
+                            <button
+                                className="navbar-menu-toggle"
+                                ref={buttonRef}
+                                onClick={handleToggleMenu}
+                            >
+                                {isDropdownOpen ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                         fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                                         strokeLinejoin="round">
+                                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                                    </svg>
+                                )}
+                            </button>
+                            <ul className={`dropdown-menu ${isDropdownOpen ? 'open' : ''}`} ref={dropdownRef}>
+                                <li>
+                                    <Link to="/profile" className="profile-link">
+                                        {username}
+                                        <span className="user-role">({roleTranslations[userRole] || userRole})</span>
+                                    </Link>
                                 </li>
                                 <li>
                                     <button onClick={handleLogout}>Выйти</button>

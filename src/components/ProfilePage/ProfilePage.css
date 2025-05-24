@@ -340,6 +340,20 @@ profile-action-buttons {
     text-align: center;
 }
 
+.admin-notice {
+    background: #FFF4E9;
+    border: 1px solid #FFD1A6;
+    border-radius: 4px;
+    padding: 15px;
+    margin-bottom: 20px;
+    color: #FFD1A6;
+}
+
+.admin-notice p {
+    margin: 0;
+    font-weight: 500;
+}
+
 @media (max-width: 768px) {
     .profile-fields-group {
         grid-template-columns: 1fr;

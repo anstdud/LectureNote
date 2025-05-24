@@ -301,6 +301,19 @@ body {
     height: 24px;
 }
 
+.admin-menu .dropdown-menu {
+    right: 10px;
+    width: 200px;
+}
+
+.admin-menu .profile-link {
+    cursor: default;
+}
+
+.admin-menu .profile-link:hover {
+    background-color: transparent;
+}
+
 @media (max-width: 768px) {
     .navbar-logo__a {
         display: none;

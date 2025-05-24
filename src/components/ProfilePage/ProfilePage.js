@@ -239,6 +239,12 @@ const ProfilePage = () => {
             <div className="profile-content">
                 <h2 className="profile-title">Профиль пользователя</h2>
 
+                {userData.role === 'admin' && (
+                    <div className="admin-notice">
+                        <p>Вы вошли как администратор</p>
+                    </div>
+                )}
+
                 <div className="avatar-section">
                     <img
                         src={userData.avatar_url || '/default-avatar.png'}
