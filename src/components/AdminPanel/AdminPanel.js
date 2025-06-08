@@ -46,8 +46,8 @@ const AdminPanel = () => {
         fetchRequests();
     }, []);
 
-    if (loading) return <div>Загрузка...</div>;
-    if (error) return <div>Ошибка: {error}</div>;
+    if (loading) return <div className="loading-message">Загрузка...</div>;
+    if (error) return <div className="error-message">Ошибка: {error}</div>;
 
     return (
         <div className="admin-container">
@@ -60,10 +60,10 @@ const AdminPanel = () => {
                         <div key={request.id} className="request-card">
                             <div className="request-info">
                                 <h3>{request.full_name}</h3>
-                                <p>Предмет: {request.subject}</p>
-                                <p>Пользователь: {request.username}</p>
-                                <p>Email: {request.email}</p>
-                                <p>Дата подачи: {new Date(request.created_at).toLocaleDateString()}</p>
+                                <p><strong>Предмет:</strong> {request.subject}</p>
+                                <p><strong>Пользователь:</strong> {request.username}</p>
+                                <p><strong>Email:</strong> {request.email}</p>
+                                <p><strong>Дата подачи:</strong> {new Date(request.created_at).toLocaleDateString()}</p>
                                 <a
                                     href={`http://localhost:5001${request.document_url}`}
                                     target="_blank"
