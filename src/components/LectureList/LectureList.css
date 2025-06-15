@@ -172,6 +172,41 @@
     outline: none;
 }
 
+.lectures-list::-webkit-scrollbar,
+.lectures-modal-textarea::-webkit-scrollbar {
+    width: 8px;
+    background-color: #FAF3EB;
+}
+
+.lectures-list::-webkit-scrollbar-track,
+.lectures-modal-textarea::-webkit-scrollbar-track {
+    border-radius: 4px;
+    background-color: rgba(84, 139, 116, 0.1);
+}
+
+.lectures-list::-webkit-scrollbar-thumb,
+.lectures-modal-textarea::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #548B74;
+    border: 1px solid #FAF3EB;
+}
+
+.lectures-list::-webkit-scrollbar-thumb:hover,
+.lectures-modal-textarea::-webkit-scrollbar-thumb:hover {
+    background-color: #476f5c;
+}
+
+.lectures-list {
+    scrollbar-width: thin;
+    scrollbar-color: #548B74 rgba(84, 139, 116, 0.1);
+}
+
+@media (max-width: 768px) {
+    .lectures-list::-webkit-scrollbar {
+        width: 6px;
+    }
+}
+
 @media (max-width: 768px) {
     .lectures-list {
         max-width: 100%;
