@@ -9,7 +9,7 @@ const AdminPanel = () => {
     const fetchRequests = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://lecture-note.onrender.com/api/admin/verification-requests', {
+            const response = await fetch('http://localhost:5001/api/admin/verification-requests', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -26,7 +26,7 @@ const AdminPanel = () => {
     const handleVerification = async (requestId, status) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://lecture-note.onrender.com/api/admin/verify-teacher', {
+            const response = await fetch('http://localhost:5001/api/admin/verify-teacher', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ const AdminPanel = () => {
                                 <p><strong>Email:</strong> {request.email}</p>
                                 <p><strong>Дата подачи:</strong> {new Date(request.created_at).toLocaleDateString()}</p>
                                 <a
-                                    href={`https://lecture-note.onrender.com${request.document_url}`}
+                                    href={`http://localhost:5001${request.document_url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="document-link"

@@ -26,14 +26,14 @@ SET row_security = off;
 --
 
 COPY public.users (id, username, email, password_hash, created_at, role, full_name, phone_number, city, education, bio, avatar_url) FROM stdin;
-7	admin	admin@gmail.com	$2a$12$7g8ga2zfHrpr46DQCGMCuui4WAaBpE6v3gRRX6vUk4Ah/nvUCMPeW	2025-05-24 11:12:44.378563	admin	Дудина Анастасия Андреевна	89805447999	Воронеж	ВГТУ колледж	Админ	https://lecture-note.onrender.com/uploads/1748076163908-7013225-Ð·Ð°Ð³ÑÑÐ·ÐºÐ°.jfif
+7	admin	admin@gmail.com	$2a$12$7g8ga2zfHrpr46DQCGMCuui4WAaBpE6v3gRRX6vUk4Ah/nvUCMPeW	2025-05-24 11:12:44.378563	admin	Дудина Анастасия Андреевна	89805447999	Воронеж	ВГТУ колледж	Админ	http://localhost:5001/uploads/1748076163908-7013225-Ð·Ð°Ð³ÑÑÐ·ÐºÐ°.jfif
 8	victoria	victoria@gmail.com	$2b$10$yxXSnKU9rSK6OGF0T2e34udVGzGjAgACRMh16gj.Oi46JE9.a7JxK	2025-05-24 12:30:06.457728	student	\N	\N	\N	\N	\N	\N
 9	artem	artem@gmail.com	$2b$10$egZDauxycTd81JLsup9X/uhcflyF.x6qITuLLNOqXWNi/bvc4icZ2	2025-05-24 12:35:48.342415	student	\N	\N	\N	\N	\N	\N
-2	deemure	deemure@gmail.com	$2b$10$efI4wOv7X4mk2SgtJMLVb.QX0.YTaXedVijMu1WfYrxgtLviKrnDW	2025-05-07 12:37:02.144433	student	Братчикова Виктория Анатольевна	88005553535	Воронеж	ВГЛТУ		https://lecture-note.onrender.com/uploads/1747906367628-16927639-8. ÐÐ¾Ð¶ÑÑ ÐºÐ¾ÑÐ¾Ð²ÐºÐ°.jpg
-6	fedorov	fedorov@gmail.com	$2b$10$x5R4vzlYlg.819AXAOHNsO9/rTGBcWgO5R0QrNnq3BfiL1YCHHwpu	2025-05-22 13:48:54.848652	teacher	\N	\N	\N	\N	\N	https://lecture-note.onrender.com/uploads/1749990405810-659225300-3. ÐÐµÐ¾Ð¿Ð°ÑÐ´.jpg
-1	ttwinkleee	ttwinkleee@gmail.com	$2b$10$hfIQ5Sbs1.lffFh5dO9s2OtgjlxIUebBU4IRAFwN6.Nmjl0LpXGry	2025-05-07 12:32:59.328213	student	Дудина Анастасия Андреевна	89805447999	Воронеж	ВГТУ колледж	Программист	https://lecture-note.onrender.com/uploads/1747863274419-734806136-Ð·Ð°Ð³ÑÑÐ·ÐºÐ°.jfif
-5	mxdnights	mxdnights@gmail.com	$2b$10$cCSxJ3Wv.hPSB9Q4srsBsOpOAquPKCZjEqxNeFVqJ5l98hcBhpTFW	2025-05-22 11:13:20.989303	teacher	Кириченко Максим Романович	89204567892	Воронеж	ВГТУ колледж	Программист	https://lecture-note.onrender.com/uploads/1747901654488-25417149-6. ÐÐ¸ÑÐ°Ñ.jpg
-3	fercuerro	fercuerro@gmail.com	$2b$10$HjaeTpLldkXzXolsehvpQePgvK.y49MwTVf/KsrgF4pfp6jVx6T8u	2025-05-07 12:51:00.124552	teacher	Дмитриев Владимир Романович	89204480271	Воронеж	ВГТУ колледж	Программист	https://lecture-note.onrender.com/uploads/1747898111110-818719263-5. ÐÐµÐ»ÑÐ¹ ÑÐ¸Ð³ÑÐµÐ½Ð¾Ðº.jpg
+2	deemure	deemure@gmail.com	$2b$10$efI4wOv7X4mk2SgtJMLVb.QX0.YTaXedVijMu1WfYrxgtLviKrnDW	2025-05-07 12:37:02.144433	student	Братчикова Виктория Анатольевна	88005553535	Воронеж	ВГЛТУ		http://localhost:5001/uploads/1747906367628-16927639-8. ÐÐ¾Ð¶ÑÑ ÐºÐ¾ÑÐ¾Ð²ÐºÐ°.jpg
+6	fedorov	fedorov@gmail.com	$2b$10$x5R4vzlYlg.819AXAOHNsO9/rTGBcWgO5R0QrNnq3BfiL1YCHHwpu	2025-05-22 13:48:54.848652	teacher	\N	\N	\N	\N	\N	http://localhost:5001/uploads/1749990405810-659225300-3. ÐÐµÐ¾Ð¿Ð°ÑÐ´.jpg
+1	ttwinkleee	ttwinkleee@gmail.com	$2b$10$hfIQ5Sbs1.lffFh5dO9s2OtgjlxIUebBU4IRAFwN6.Nmjl0LpXGry	2025-05-07 12:32:59.328213	student	Дудина Анастасия Андреевна	89805447999	Воронеж	ВГТУ колледж	Программист	http://localhost:5001/uploads/1747863274419-734806136-Ð·Ð°Ð³ÑÑÐ·ÐºÐ°.jfif
+5	mxdnights	mxdnights@gmail.com	$2b$10$cCSxJ3Wv.hPSB9Q4srsBsOpOAquPKCZjEqxNeFVqJ5l98hcBhpTFW	2025-05-22 11:13:20.989303	teacher	Кириченко Максим Романович	89204567892	Воронеж	ВГТУ колледж	Программист	http://localhost:5001/uploads/1747901654488-25417149-6. ÐÐ¸ÑÐ°Ñ.jpg
+3	fercuerro	fercuerro@gmail.com	$2b$10$HjaeTpLldkXzXolsehvpQePgvK.y49MwTVf/KsrgF4pfp6jVx6T8u	2025-05-07 12:51:00.124552	teacher	Дмитриев Владимир Романович	89204480271	Воронеж	ВГТУ колледж	Программист	http://localhost:5001/uploads/1747898111110-818719263-5. ÐÐµÐ»ÑÐ¹ ÑÐ¸Ð³ÑÐµÐ½Ð¾Ðº.jpg
 \.
 
 
