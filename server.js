@@ -7,6 +7,7 @@ import * as dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
+import path from 'path'; // ✅ ДОБАВЬТЕ ЭТОТ ИМПОРТ!
 import { fileURLToPath } from 'url'; // ✅ ДОБАВЬТЕ ЭТОТ ИМПОРТ
 
 // ✅ ДОБАВЬТЕ ЭТО для работы с __dirname в ES modules
@@ -34,10 +35,13 @@ const upload = multer({ storage });
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 
-app.use(express.static(path.join(__dirname, 'build')));
+app.use(express.json());
 
+// ✅ ОБЯЗАТЕЛЬНО ДОБАВЬТЕ ОТДАЧУ СТАТИЧЕСКИХ ФАЙЛОВ
+app.use(express.static(path.join(__dirname, 'build')));
 app.use('/uploads', express.static('uploads'));
 
+// ✅ ИСПРАВЬТЕ CORS для продакшена
 app.use(cors({
     origin: ['http://localhost:3000', 'https://lecture-note.onrender.com'],
     credentials: true,
