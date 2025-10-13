@@ -52,7 +52,7 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
         e.preventDefault();
         setIsLoading(true);
         try {
-            const response = await fetch('http://localhost:5001/api/login', {
+            const response = await fetch('https://lecture-note.onrender.com/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -88,7 +88,7 @@ const AuthModal = ({ setIsAuthenticated, setUserRole }) => {
         }
 
         try {
-            const response = await fetch('http://localhost:5001/api/register', {
+            const response = await fetch('https://lecture-note.onrender.com/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
