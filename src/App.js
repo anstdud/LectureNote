@@ -10,6 +10,7 @@
   import TutoringPage from './components/TutoringPage/TutoringPage.js';
   import './App.css';
   import AdminPanel from "./components/AdminPanel/AdminPanel.js";
+  const API_BASE_URL = 'https://lecture-note.onrender.com';
   // import 'normalize.css';
 
   const ProtectedRoute = ({ children, isAuthenticated }) => {
@@ -168,7 +169,7 @@
       }
 
       try {
-        const response = await fetch(`http://localhost:5001/api/lectures?t=${Date.now()}`, {
+        const response = await fetch(`${API_BASE_URL}/api/lectures?t=${Date.now()}`, {
           headers: { 'Authorization': `Bearer ${token}` },
         });
 
@@ -253,8 +254,8 @@
 
       try {
         const url = currentLecture
-            ? `http://localhost:5001/api/lectures/${currentLecture.id}`
-            : 'http://localhost:5001/api/lectures';
+            ? `${API_BASE_URL}/api/lectures/${currentLecture.id}`
+            : `${API_BASE_URL}/api/lectures`;
 
         const response = await fetch(url, {
           method: currentLecture ? 'PUT' : 'POST',
@@ -283,7 +284,7 @@
       }
 
       try {
-        const response = await fetch(`http://localhost:5001/api/lectures/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/lectures/${id}`, {
           method: 'DELETE',
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -318,7 +319,7 @@
       }
 
       try {
-        const response = await fetch(`http://localhost:5001/api/lectures/${lectureId}/share`, {
+        const response = await fetch(`${API_BASE_URL}/api/lectures/${lectureId}/share`, {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${token}` },
         });
@@ -337,7 +338,7 @@
     const handleAddByCode = async (code) => {
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch('http://localhost:5001/api/lectures/add-by-code', {
+        const response = await fetch(`${API_BASE_URL}/api/lectures/add-by-code`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
