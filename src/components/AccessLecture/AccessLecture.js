@@ -13,7 +13,7 @@ const AccessLecture = ({ onLectureAccess }) => {
                 return;
             }
 
-            const response = await fetch(`http://localhost:5001/api/lectures/shared/${code}`, {
+            const response = await fetch(`https://lecture-note.onrender.com5001/api/lectures/shared/${code}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 },

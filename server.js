@@ -7,15 +7,22 @@ import * as dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
-import path from 'path'; // ✅ ДОБАВЬТЕ ЭТОТ ИМПОРТ!
-import { fileURLToPath } from 'url'; // ✅ ДОБАВЬТЕ ЭТОТ ИМПОРТ
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// ✅ ДОБАВЬТЕ ЭТО для работы с __dirname в ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 
 dotenv.config();
+
+console.log('=== DATABASE CONFIG ===');
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+if (process.env.DATABASE_URL) {
+    const url = new URL(process.env.DATABASE_URL);
+    console.log('Host:', url.hostname);
+    console.log('Database:', url.pathname);
+}
 
 const { Pool } = pkg;
 const app = express();
@@ -37,16 +44,14 @@ app.use('/uploads', express.static('uploads'));
 
 app.use(express.json());
 
-// ✅ ОБЯЗАТЕЛЬНО ДОБАВЬТЕ ОТДАЧУ СТАТИЧЕСКИХ ФАЙЛОВ
 app.use(express.static(path.join(__dirname, 'build')));
 app.use('/uploads', express.static('uploads'));
 
-// ✅ ИСПРАВЬТЕ CORS для продакшена
 app.use(cors({
     origin: [
-        'http://localhost:3000',
+        'https://lecture-note.onrender.com3000',
         'https://lecture-note.onrender.com',
-        'https://your-frontend-domain.vercel.app' // ⬅️ ДОБАВЬТЕ ВАШ VERCEL DOMAIN
+        'https://your-frontend-domain.vercel.app'
     ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -1070,10 +1075,6 @@ app.put('/api/admin/verify-teacher', authenticate, [
     }
 });
 
-// app.listen(port, () => {
-//     console.log(`Сервер работает на порту ${port}`);
-// });
-
 pool.on('connect', () => {
     console.log('✅ База данных подключена!');
 });
@@ -1082,12 +1083,10 @@ pool.on('error', (err) => {
     console.error('❌ Ошибка БД:', err);
 });
 
-// ✅ ВАЖНО: ВСЕ остальные запросы отправляем на React
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build', 'index.html'));
 });
 
-// ✅ УБЕДИТЕСЬ ЧТО СЕРВЕР СЛУШАЕТ ПОРТ ПРАВИЛЬНО
 app.listen(port, '0.0.0.0', () => {
     console.log(`Сервер работает на порту ${port}`);
 });
