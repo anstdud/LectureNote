@@ -8,6 +8,9 @@ import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 
 const { Pool } = pkg;
