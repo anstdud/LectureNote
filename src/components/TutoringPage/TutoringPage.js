@@ -35,7 +35,7 @@ const TutoringPage = ({ userRole }) => {
     const fetchOccupied = useCallback(async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://lecture-note.onrender.com5001/api/bookings/all-occupied', {
+            const response = await fetch('https://lecture-note.onrender.com/api/bookings/all-occupied', {
                 headers: { 'Authorization': `Bearer ${token}` },
             });
             const data = await response.json();
@@ -57,7 +57,7 @@ const TutoringPage = ({ userRole }) => {
 
         try {
             if (userRole === 'student') {
-                const response = await fetch(`https://lecture-note.onrender.com5001/api/student/bookings?t=${Date.now()}`, {
+                const response = await fetch(`https://lecture-note.onrender.com/api/student/bookings?t=${Date.now()}`, {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
 
@@ -65,7 +65,7 @@ const TutoringPage = ({ userRole }) => {
                 const data = await response.json();
                 setStudentBookings(data);
             } else {
-                const response = await fetch(`https://lecture-note.onrender.com5001/api/tutoring?t=${Date.now()}`, {
+                const response = await fetch(`https://lecture-note.onrender.com/api/tutoring?t=${Date.now()}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -104,7 +104,7 @@ const TutoringPage = ({ userRole }) => {
         const fetchOccupiedTimes = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch('https://lecture-note.onrender.com5001/api/bookings/all-occupied', {
+                const response = await fetch('https://lecture-note.onrender.com/api/bookings/all-occupied', {
                     headers: { 'Authorization': `Bearer ${token}` },
                 });
                 const data = await response.json();
@@ -129,10 +129,10 @@ const TutoringPage = ({ userRole }) => {
         try {
             if (userRole === 'student') {
                 const [tutorsResponse, bookingsResponse] = await Promise.all([
-                    fetch(`https://lecture-note.onrender.com5001/api/tutors?t=${Date.now()}`, {
+                    fetch(`https://lecture-note.onrender.com/api/tutors?t=${Date.now()}`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                     }),
-                    fetch(`https://lecture-note.onrender.com5001/api/student/bookings?t=${Date.now()}`, {
+                    fetch(`https://lecture-note.onrender.com/api/student/bookings?t=${Date.now()}`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                     })
                 ]);
@@ -148,7 +148,7 @@ const TutoringPage = ({ userRole }) => {
                 setTutors(tutorsData);
                 setStudentBookings(bookingsData);
             } else {
-                const response = await fetch(`https://lecture-note.onrender.com5001/api/tutoring?t=${Date.now()}`, {
+                const response = await fetch(`https://lecture-note.onrender.com/api/tutoring?t=${Date.now()}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -234,7 +234,7 @@ const TutoringPage = ({ userRole }) => {
 
             console.log('Отправляемые данные:', bodyData);
 
-            const response = await fetch('https://lecture-note.onrender.com5001/api/tutor', {
+            const response = await fetch('https://lecture-note.onrender.com/api/tutor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ const TutoringPage = ({ userRole }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://lecture-note.onrender.com5001/api/tutor', {
+            const response = await fetch('https://lecture-note.onrender.com/api/tutor', {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -334,7 +334,7 @@ const TutoringPage = ({ userRole }) => {
                 throw new Error('Это время уже занято');
             }
 
-            const response = await fetch('https://lecture-note.onrender.com5001/api/tutoring', {
+            const response = await fetch('https://lecture-note.onrender.com/api/tutoring', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ const TutoringPage = ({ userRole }) => {
     const handleCancelBooking = async (bookingId) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`https://lecture-note.onrender.com5001/api/bookings/${bookingId}`, {
+            const response = await fetch(`https://lecture-note.onrender.com/api/bookings/${bookingId}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` },
             });
@@ -489,7 +489,7 @@ const TutoringPage = ({ userRole }) => {
     const handleRateTutor = async (tutorId, rating) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch('https://lecture-note.onrender.com5001/api/rate-tutor', {
+            const response = await fetch('https://lecture-note.onrender.com/api/rate-tutor', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

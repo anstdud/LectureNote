@@ -28,7 +28,7 @@ const LectureList = ({ lectures, openModal, deleteLecture, fetchLectures, isSear
                 return;
             }
 
-            await fetch('https://lecture-note.onrender.com5001/api/lectures', {
+            await fetch('https://lecture-note.onrender.com/api/lectures', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
