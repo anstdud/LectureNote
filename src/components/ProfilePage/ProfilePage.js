@@ -32,7 +32,7 @@ const ProfilePage = () => {
         const fetchVerificationStatus = async () => {
             if (userData.role === 'teacher') {
                 try {
-                    const response = await fetch('http://localhost:5001/api/tutor/verification-status', {
+                    const response = await fetch('https://lecture-note.onrender.com/api/tutor/verification-status', {
                         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
                     });
                     const data = await response.json();
@@ -52,10 +52,10 @@ const ProfilePage = () => {
             const token = localStorage.getItem('token');
             try {
                 const [userResponse, tutorResponse] = await Promise.all([
-                    fetch('http://localhost:5001/api/user', {
+                    fetch('https://lecture-note.onrender.com/api/user', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     }),
-                    fetch('http://localhost:5001/api/tutor', {
+                    fetch('https://lecture-note.onrender.com/api/tutor', {
                         headers: { 'Authorization': `Bearer ${token}` },
                     })
                 ]);
@@ -100,7 +100,7 @@ const ProfilePage = () => {
         const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch('http://localhost:5001/api/user', {
+            const response = await fetch('https://lecture-note.onrender.com/api/user', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -148,7 +148,7 @@ const ProfilePage = () => {
         }
 
         try {
-            const response = await fetch('http://localhost:5001/api/user/password', {
+            const response = await fetch('https://lecture-note.onrender.com/api/user/password', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -178,7 +178,7 @@ const ProfilePage = () => {
         formData.append('avatar', file);
 
         try {
-            const response = await fetch('http://localhost:5001/api/upload-avatar', {
+            const response = await fetch('https://lecture-note.onrender.com/api/upload-avatar', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -207,7 +207,7 @@ const ProfilePage = () => {
             const formData = new FormData();
             formData.append('document', file);
 
-            const response = await fetch('http://localhost:5001/api/tutor/upload-document', {
+            const response = await fetch('https://lecture-note.onrender.com/api/tutor/upload-document', {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('token')}`

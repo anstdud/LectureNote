@@ -7,8 +7,22 @@ import * as dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 dotenv.config();
+
+console.log('=== DATABASE CONFIG ===');
+console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+if (process.env.DATABASE_URL) {
+    const url = new URL(process.env.DATABASE_URL);
+    console.log('Host:', url.hostname);
+    console.log('Database:', url.pathname);
+}
 
 const { Pool } = pkg;
 const app = express();
@@ -27,8 +41,18 @@ const upload = multer({ storage });
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
+app.use(express.json());
+
+app.use(express.static(path.join(__dirname, 'build')));
+app.use('/uploads', express.static('uploads'));
+
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: [
+        'https://lecture-note.onrender.com',
+        'https://lecture-note.onrender.com',
+        'https://your-frontend-domain.vercel.app'
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -42,21 +66,14 @@ app.options('*', (req, res) => {
 app.use(express.json());
 
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 });
-
-pool.connect()
-    .then(() => console.log('Бд подключена'))
-    .catch(err => console.error('Бд НЕ подключена:', err));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
@@ -1058,6 +1075,18 @@ app.put('/api/admin/verify-teacher', authenticate, [
     }
 });
 
-app.listen(port, () => {
+pool.on('connect', () => {
+    console.log('✅ База данных подключена!');
+});
+
+pool.on('error', (err) => {
+    console.error('❌ Ошибка БД:', err);
+});
+
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+app.listen(port, '0.0.0.0', () => {
     console.log(`Сервер работает на порту ${port}`);
 });
