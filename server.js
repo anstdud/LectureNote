@@ -42,11 +42,8 @@ app.options('*', (req, res) => {
 app.use(express.json());
 
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
 });
 
 app.use((req, res, next) => {
@@ -1058,6 +1055,14 @@ app.put('/api/admin/verify-teacher', authenticate, [
     }
 });
 
-app.listen(port, () => {
-    console.log(`Сервер работает на порту ${port}`);
+// app.listen(port, () => {
+//     console.log(`Сервер работает на порту ${port}`);
+// });
+
+pool.on('connect', () => {
+    console.log('✅ База данных подключена!');
+});
+
+pool.on('error', (err) => {
+    console.error('❌ Ошибка БД:', err);
 });
