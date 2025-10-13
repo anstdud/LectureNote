@@ -7,9 +7,12 @@ import * as dotenv from 'dotenv';
 import { body, validationResult } from 'express-validator';
 import multer from 'multer';
 import { existsSync, mkdirSync } from 'fs';
+import { fileURLToPath } from 'url'; // ✅ ДОБАВЬТЕ ЭТОТ ИМПОРТ
 
+// ✅ ДОБАВЬТЕ ЭТО для работы с __dirname в ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
 
 dotenv.config();
 
@@ -30,8 +33,13 @@ const upload = multer({ storage });
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
+
+app.use(express.static(path.join(__dirname, 'build')));
+
+app.use('/uploads', express.static('uploads'));
+
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: ['http://localhost:3000', 'https://lecture-note.onrender.com'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -53,10 +61,6 @@ app.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
     next();
 });
-
-pool.connect()
-    .then(() => console.log('Бд подключена'))
-    .catch(err => console.error('Бд НЕ подключена:', err));
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret';
 
@@ -1068,4 +1072,14 @@ pool.on('connect', () => {
 
 pool.on('error', (err) => {
     console.error('❌ Ошибка БД:', err);
+});
+
+// ✅ ВАЖНО: ВСЕ остальные запросы отправляем на React
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build', 'index.html'));
+});
+
+// ✅ УБЕДИТЕСЬ ЧТО СЕРВЕР СЛУШАЕТ ПОРТ ПРАВИЛЬНО
+app.listen(port, '0.0.0.0', () => {
+    console.log(`Сервер работает на порту ${port}`);
 });
