@@ -43,7 +43,11 @@ app.use('/uploads', express.static('uploads'));
 
 // ✅ ИСПРАВЬТЕ CORS для продакшена
 app.use(cors({
-    origin: ['http://localhost:3000', 'https://lecture-note.onrender.com'],
+    origin: [
+        'http://localhost:3000',
+        'https://lecture-note.onrender.com',
+        'https://your-frontend-domain.vercel.app' // ⬅️ ДОБАВЬТЕ ВАШ VERCEL DOMAIN
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
