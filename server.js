@@ -17,15 +17,6 @@ const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
-// Добавьте после dotenv.config()
-console.log('=== DATABASE CONFIG ===');
-console.log('DATABASE_URL exists:', !!process.env.DATABASE_URL);
-if (process.env.DATABASE_URL) {
-    const url = new URL(process.env.DATABASE_URL);
-    console.log('Host:', url.hostname);
-    console.log('Database:', url.pathname);
-}
-
 const { Pool } = pkg;
 const app = express();
 const port = process.env.PORT || 5001;
